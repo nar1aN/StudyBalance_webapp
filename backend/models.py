@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Float, Text, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Float, Text, Enum, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
@@ -17,12 +17,10 @@ class TaskType(str, enum.Enum):
     section = "section"
     other = "other"
 
-
 class DifficultyLevel(str, enum.Enum):
     easy = "easy"
     medium = "medium"
     hard = "hard"
-
 
 class User(Base):
     __tablename__ = "users"
@@ -33,9 +31,17 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    notify_day = Column(Boolean, default=True, nullable=False)
+    notify_urgent = Column(Boolean, default=False, nullable=False)
+    notify_overload = Column(Boolean, default=True, nullable=False)
+    notify_morning = Column(Boolean, default=False, nullable=False)
+    overload_threshold = Column(Float, default=4.0, nullable=False)
+    last_morning_notified = Column(DateTime(timezone=True), nullable=True)
+    last_overload_notified = Column(DateTime(timezone=True), nullable=True)
+
     tasks = relationship("Task", back_populates="owner", cascade="all, delete-orphan")
     subjects = relationship("Subject", back_populates="owner", cascade="all, delete-orphan")
-
+    push_subscriptions = relationship("PushSubscription", back_populates="user", cascade="all, delete-orphan")
 
 class Subject(Base):
     __tablename__ = "subjects"
@@ -48,7 +54,6 @@ class Subject(Base):
 
     owner = relationship("User", back_populates="subjects")
     tasks = relationship("Task", back_populates="subject")
-
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -64,9 +69,35 @@ class Task(Base):
     completed_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    notified_day_at = Column(DateTime(timezone=True), nullable=True)
+    notified_urgent_at = Column(DateTime(timezone=True), nullable=True)
+
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=True)
 
     owner = relationship("User", back_populates="tasks")
     subject = relationship("Subject", back_populates="tasks")
     priority = Column(String(10), default="medium", nullable=False)
+
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    author = relationship("User")
+
+class PushSubscription(Base):
+    __tablename__ = "push_subscriptions"
+    __table_args__ = (UniqueConstraint("endpoint", name="uq_push_subscriptions_endpoint"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    endpoint = Column(Text, nullable=False)
+    p256dh = Column(String(255), nullable=False)
+    auth = Column(String(255), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="push_subscriptions")

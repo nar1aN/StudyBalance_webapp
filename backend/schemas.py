@@ -3,8 +3,6 @@ from typing import Optional, List
 from datetime import datetime
 from .models import TaskType, DifficultyLevel, PriorityLevel
 
-
-#Auth
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
@@ -22,8 +20,6 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-
-# Subject
 class SubjectCreate(BaseModel):
     name: str
     color: Optional[str] = "#4A90D9"
@@ -39,8 +35,6 @@ class SubjectOut(BaseModel):
     class Config:
         from_attributes = True
 
-
-#Task
 class TaskCreate(BaseModel):
     title: str
     description: Optional[str] = None
@@ -78,9 +72,56 @@ class TaskOut(BaseModel):
     class Config:
         from_attributes = True
 
+class TaskParseRequest(BaseModel):
+    text: str
 
+class TaskParseResponse(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    task_type: Optional[str] = None
+    priority: Optional[str] = None
+    estimated_hours: Optional[float] = None
+    deadline: Optional[str] = None
 
-# Stats
+class TaskDescribeRequest(BaseModel):
+    title: str
+    task_type: Optional[str] = None
+    subject_name: Optional[str] = None
+    difficulty: Optional[str] = None
+
+class TaskDescribeResponse(BaseModel):
+    description: str
+
+class AIHintsResponse(BaseModel):
+    hints: List[str]
+
+class PushKeys(BaseModel):
+    p256dh: str
+    auth: str
+
+class PushSubscribeRequest(BaseModel):
+    endpoint: str
+    keys: PushKeys
+
+class PushUnsubscribeRequest(BaseModel):
+    endpoint: str
+
+class NotifySettings(BaseModel):
+    notify_day: bool = True
+    notify_urgent: bool = False
+    notify_overload: bool = True
+    notify_morning: bool = False
+    overload_threshold: float = 4.0
+    class Config:
+        from_attributes = True
+
+class NotifySettingsUpdate(BaseModel):
+    notify_day: Optional[bool] = None
+    notify_urgent: Optional[bool] = None
+    notify_overload: Optional[bool] = None
+    notify_morning: Optional[bool] = None
+    overload_threshold: Optional[float] = None
+
 class DayLoad(BaseModel):
     date: str
     total_hours: float

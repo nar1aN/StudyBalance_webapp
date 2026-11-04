@@ -235,6 +235,15 @@ select option{background:var(--bg3)}
 .modal-title{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:700}
 .modal-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;padding:4px}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+.ai-parse-block{background:linear-gradient(135deg,rgba(124,106,247,.08),rgba(92,224,216,.06));border:1px solid rgba(124,106,247,.25);border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.ai-parse-label{font-size:12px;font-weight:700;color:var(--accent2);letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-parse-row{display:flex;gap:8px;align-items:flex-end}
+.ai-parse-row textarea{flex:1;resize:none;font-size:13px;background:rgba(255,255,255,.04);border-color:rgba(124,106,247,.3)}
+.btn-ai{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;flex-shrink:0;width:80px;height:68px;padding:0;font-size:12px;font-weight:700;line-height:1.3;border-radius:10px}
+.btn-ai:hover:not(:disabled){opacity:.88;transform:translateY(-1px)}
+.btn-ai:disabled{opacity:.45;cursor:not-allowed}
+.ai-divider{display:flex;align-items:center;gap:8px;margin:14px 0 2px;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.ai-divider::before,.ai-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* MISC */
 .empty{text-align:center;padding:60px 20px;color:var(--text3)}
@@ -255,6 +264,36 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
 .dp-name{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
 .dp-date{font-size:15px;font-weight:700}.dp-hours{font-size:9px;color:var(--text3);margin-top:2px}
 
+
+/* CHAT */
+.right-panel.chat-mode{overflow:hidden}
+.chat-page{display:flex;flex-direction:column;height:100%}
+.chat-hdr{padding:16px 24px;font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:10px}
+.cmrow{display:flex;flex-direction:column;max-width:74%}
+.cmrow.mine{align-self:flex-end;align-items:flex-end}
+.cmrow.theirs{align-self:flex-start;align-items:flex-start}
+.cbubble{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
+.cbubble.mine{background:linear-gradient(135deg,var(--accent),#6055e0);color:#fff;border-bottom-right-radius:4px}
+.cbubble.theirs{background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+.cbubble.typing{display:flex;gap:5px;align-items:center;padding:13px 18px}
+.cbubble.typing span{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:tdot .8s infinite}
+.cbubble.typing span:nth-child(2){animation-delay:.16s}
+.cbubble.typing span:nth-child(3){animation-delay:.32s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+.cmeta{font-size:10px;color:var(--text3);margin-top:3px}
+.caction{margin-top:7px;padding:5px 10px;background:rgba(82,217,138,.12);border:1px solid rgba(82,217,138,.2);border-radius:8px;font-size:12px;color:var(--green)}
+.chat-input-bar{padding:12px 24px 16px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.qchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.qchip{padding:5px 11px;background:var(--card);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.qchip:hover{border-color:var(--accent);color:var(--accent)}
+.chat-row{display:flex;gap:10px;align-items:flex-end}
+.ctextarea{flex:1;min-height:42px;max-height:120px;resize:none;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .2s;line-height:1.5}
+.ctextarea:focus{border-color:var(--accent)}
+.chat-send{width:44px;height:44px;border-radius:12px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chat-send:hover:not(:disabled){background:#6055e0;transform:translateY(-1px)}
+.chat-send:disabled{opacity:.4;cursor:not-allowed}
+.chat-author{font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:3px;margin-left:4px}
 
 /* FAB */
 .fab{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:999;transition:all .2s}
@@ -360,6 +399,12 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
     <div class="nav-icon-btn" :class="{active:page==='stats'}" @click="page='stats';loadStats()" title="Статистика">
       <span>📊</span><span class="nav-tooltip">Статистика</span>
     </div>
+    <div class="nav-icon-btn" :class="{active:page==='aichat'}" @click="page='aichat'" title="AI Ассистент">
+      <span>🤖</span><span class="nav-tooltip">AI Ассистент</span>
+    </div>
+    <div class="nav-icon-btn" :class="{active:page==='userchat'}" @click="page='userchat'" title="Чат">
+      <span>💬</span><span class="nav-tooltip">Чат</span>
+    </div>
     <div class="sidebar-spacer"></div>
     <div class="sidebar-avatar" @click="page='settings'" :title="user?.username">
       {{user?.username?.[0]?.toUpperCase()||'?'}}
@@ -417,8 +462,34 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
       <div class="left-nav-item" :class="{active:settTab==='backup'}" @click="settTab='backup'"><span class="left-nav-icon">💾</span> Резервная копия</div>
     </div>
 
+    <!-- LEFT PANEL: AI Chat -->
+    <div v-if="page==='aichat'" class="left-panel">
+      <div class="left-panel-header">AI Ассистент</div>
+      <div class="left-section-title">Быстрые вопросы</div>
+      <div v-for="s in aiSuggestions" :key="s" class="left-nav-item" style="font-size:12px;line-height:1.4;height:auto;padding:10px 14px" @click="sendAI(s)">
+        <span class="left-nav-icon">💬</span>{{s}}
+      </div>
+      <div style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--border)">
+        <button class="btn btn-ghost btn-sm" style="width:100%;font-size:12px" @click="clearAIChat">🗑 Очистить историю</button>
+      </div>
+    </div>
+
+    <!-- LEFT PANEL: User Chat -->
+    <div v-if="page==='userchat'" class="left-panel">
+      <div class="left-panel-header">Чат</div>
+      <div class="left-nav-item active"><span class="left-nav-icon">💬</span> Общая беседа</div>
+      <div style="padding:12px 16px;margin-top:8px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Сейчас в чате</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0">
+          <div class="sidebar-avatar" style="width:28px;height:28px;font-size:11px;cursor:default">{{user?.username?.[0]?.toUpperCase()||'?'}}</div>
+          <span style="font-size:13px;font-weight:500">{{user?.username}}</span>
+          <span style="margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
+        </div>
+      </div>
+    </div>
+
     <!-- RIGHT PANEL -->
-    <div class="right-panel">
+    <div class="right-panel" :class="{'chat-mode':page==='aichat'||page==='userchat'}">
 
       <!-- TASKS PAGE -->
       <div v-if="page==='tasks'" class="page">
@@ -602,6 +673,25 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
             <span class="reco-icon">{{r.icon}}</span><span>{{r.text}}</span>
           </div>
         </div>
+
+        <!-- AI Советник -->
+        <div class="reco-card" style="border-color:rgba(124,106,247,.3);background:linear-gradient(135deg,rgba(124,106,247,.05),rgba(92,224,216,.03))">
+          <div class="reco-title" style="display:flex;align-items:center;justify-content:space-between">
+            <span>🤖 AI Советник</span>
+            <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:4px 12px" @click="loadAIHints" :disabled="hintsLoading">
+              <span v-if="hintsLoading">⏳ Думаю…</span><span v-else>↻ Обновить</span>
+            </button>
+          </div>
+          <div v-if="hintsLoading&&!aiHints.length" class="reco-item" style="color:var(--text3)">
+            <span class="reco-icon">⏳</span><span>Анализирую нагрузку…</span>
+          </div>
+          <div v-else-if="!aiHints.length" class="reco-item" style="color:var(--text3)">
+            <span class="reco-icon">🤖</span><span>Нажми «Обновить» для персональных советов</span>
+          </div>
+          <div v-for="h in aiHints" :key="h" class="reco-item">
+            <span class="reco-icon">✦</span><span>{{h}}</span>
+          </div>
+        </div>
         <div class="charts-grid">
           <div class="chart-card"><div class="chart-hdr"><div class="chart-lbl">Нагрузка по дням (ч)</div><span class="chart-dl" @click="dlChart('wc','load')">💾</span></div><div class="chart-insight" v-if="wStats">{{weekInsight}}</div><div class="chart-wrap"><canvas ref="wc"></canvas></div></div>
           <div class="chart-card"><div class="chart-hdr"><div class="chart-lbl">Задачи по предметам</div><span class="chart-dl" @click="dlChart('sc','subjects')">💾</span></div><div class="chart-insight" v-if="subjStats.length">{{subjectInsight}}</div><div class="chart-wrap"><canvas ref="sc"></canvas></div></div>
@@ -633,6 +723,12 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
         <!-- Notify tab -->
         <div v-if="settTab==='notify'" class="sett-card" style="max-width:500px">
           <div class="sett-title">🔔 Уведомления</div>
+          <div class="toggle-row">
+            <div><div class="tgl-lbl">Push-уведомления в браузере</div><div style="font-size:12px;color:var(--text2)">Приходят на телефон/компьютер, даже когда сайт закрыт</div></div>
+            <label class="toggle"><input type="checkbox" :checked="pushSubscribed" :disabled="pushBusy||!pushSupported" @change="togglePush"><div class="tgl-track"><div class="tgl-thumb"></div></div></label>
+          </div>
+          <div v-if="!pushSupported" style="font-size:12px;color:var(--danger);margin:-8px 0 12px">Этот браузер не поддерживает push-уведомления</div>
+          <button v-if="pushSubscribed" class="btn btn-ghost btn-sm" style="width:auto;padding:8px 16px;margin-bottom:16px" @click="testPush">Отправить тестовое уведомление</button>
           <div class="toggle-row"><div><div class="tgl-lbl">За день до дедлайна</div></div><label class="toggle"><input type="checkbox" v-model="cfg.notifyDay"><div class="tgl-track"><div class="tgl-thumb"></div></div></label></div>
           <div class="toggle-row"><div><div class="tgl-lbl">Срочное (за 2 часа)</div></div><label class="toggle"><input type="checkbox" v-model="cfg.notifyUrgent"><div class="tgl-track"><div class="tgl-thumb"></div></div></label></div>
           <div class="toggle-row"><div><div class="tgl-lbl">Предупреждение о перегрузе</div></div><label class="toggle"><input type="checkbox" v-model="cfg.notifyOverload"><div class="tgl-track"><div class="tgl-thumb"></div></div></label></div>
@@ -669,6 +765,65 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
         </div>
       </div>
 
+      <!-- AI CHAT PAGE -->
+      <div v-if="page==='aichat'" class="chat-page">
+        <div class="chat-hdr">
+          <span>🤖 AI Ассистент</span>
+          <span style="font-size:12px;font-weight:400;color:var(--text3)">на базе {{aiModel}}</span>
+        </div>
+        <div ref="aiChatBox" class="chat-msgs">
+          <div v-if="!aiMessages.length" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);text-align:center;padding:40px 20px">
+            <div style="font-size:52px;margin-bottom:16px">🤖</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text2);margin-bottom:8px">AI Ассистент готов помочь</div>
+            <div style="font-size:13px;max-width:300px">Спроси о расписании, попроси добавить или перенести задачу, получи рекомендацию</div>
+          </div>
+          <div v-for="(msg,idx) in aiMessages" :key="idx" class="cmrow" :class="msg.role==='user'?'mine':'theirs'">
+            <div class="cbubble" :class="msg.role==='user'?'mine':'theirs'">{{msg.content}}</div>
+            <div v-if="msg.action_result" class="caction">{{msg.action_result}}</div>
+          </div>
+          <div v-if="aiTyping" class="cmrow theirs">
+            <div class="cbubble theirs typing"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <div v-if="!aiMessages.length" class="qchips">
+            <div v-for="s in aiSuggestions" :key="s" class="qchip" @click="sendAI(s)">{{s}}</div>
+          </div>
+          <div class="chat-row">
+            <textarea class="ctextarea" v-model="aiInput" placeholder="Напиши сообщение..." :disabled="aiTyping"
+              @keydown.enter.exact.prevent="sendAI()"></textarea>
+            <button class="chat-send" @click="sendAI()" :disabled="aiTyping||!aiInput.trim()">➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- USER CHAT PAGE -->
+      <div v-if="page==='userchat'" class="chat-page">
+        <div class="chat-hdr">
+          <span>💬 Общий чат</span>
+          <span style="font-size:12px;font-weight:400;color:var(--text3)">обновляется каждые 4 с</span>
+        </div>
+        <div ref="userChatBox" class="chat-msgs">
+          <div v-if="!userMessages.length" class="empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div class="empty-icon">💬</div>
+            <div class="empty-title">Пока нет сообщений</div>
+            <div style="font-size:13px">Будь первым, кто напишет!</div>
+          </div>
+          <div v-for="msg in userMessages" :key="msg.id" class="cmrow" :class="msg.user_id===user?.id?'mine':'theirs'">
+            <div v-if="msg.user_id!==user?.id" class="chat-author">{{msg.username}}</div>
+            <div class="cbubble" :class="msg.user_id===user?.id?'mine':'theirs'">{{msg.content}}</div>
+            <div class="cmeta">{{fmtMsgTime(msg.created_at)}}</div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <div class="chat-row">
+            <textarea class="ctextarea" v-model="userMsgInput" placeholder="Написать сообщение..."
+              @keydown.enter.exact.prevent="sendUserMsg()"></textarea>
+            <button class="chat-send" @click="sendUserMsg()" :disabled="!userMsgInput.trim()">➤</button>
+          </div>
+        </div>
+      </div>
+
     </div><!-- end right-panel -->
   </div><!-- end main-area -->
 </div><!-- end app -->
@@ -677,8 +832,28 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
 <div v-if="tm.show" class="modal-overlay" @click.self="tm.show=false">
   <div class="modal">
     <div class="modal-header"><div class="modal-title">{{tm.id?'Редактировать':'Новая задача'}}</div><button class="modal-close" @click="tm.show=false">✕</button></div>
+    <div v-if="!tm.id" class="ai-parse-block">
+      <div class="ai-parse-label"><span>✨</span> Быстрый ввод с AI</div>
+      <div class="ai-parse-row">
+        <textarea v-model="tm.aiText" rows="3" placeholder="«Написать доклад по истории про ВОВ в пятницу, займёт часа 3»"></textarea>
+        <button class="btn btn-ai" @click="parseAI" :disabled="tm.aiLoading||!tm.aiText?.trim()">
+          <span v-if="tm.aiLoading">⏳<br>Анализ…</span>
+          <span v-else>✨<br>Разобрать</span>
+        </button>
+      </div>
+      <div v-if="tm.aiError" class="field-error" style="margin-top:6px">{{tm.aiError}}</div>
+      <div class="ai-divider">или заполни вручную</div>
+    </div>
     <div class="form-group"><label>Название *</label><input v-model="tm.f.title" placeholder="Например: Решить задачи §12" :class="{err:tm.e.title}"><div v-if="tm.e.title" class="field-error">{{tm.e.title}}</div></div>
-    <div class="form-group"><label>Описание</label><textarea v-model="tm.f.desc" rows="2" placeholder="Дополнительные детали..."></textarea></div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;justify-content:space-between">
+        Описание
+        <button v-if="tm.f.title" class="btn btn-teal btn-sm" style="padding:3px 10px;font-size:11px;height:auto" @click="describeTask" :disabled="tm.descLoading">
+          <span v-if="tm.descLoading">⏳</span><span v-else>✨ Расписать</span>
+        </button>
+      </label>
+      <textarea v-model="tm.f.desc" rows="2" placeholder="Дополнительные детали..."></textarea>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
       <div class="form-group"><label>Предмет</label><select v-model="tm.f.subject_id"><option :value="null">Без предмета</option><option v-for="s in subjects" :key="s.id" :value="s.id">{{s.name}}</option></select></div>
       <div class="form-group"><label>Тип</label><select v-model="tm.f.task_type"><option value="homework">Домашнее задание</option><option value="project">Проект</option><option value="test">Контрольная</option><option value="olympiad">Олимпиада</option><option value="section">Кружок</option><option value="other">Другое</option></select></div>
@@ -721,7 +896,7 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
 <!-- TOAST -->
 <div v-if="toast.show" class="toast" :class="toast.type">{{toast.msg}}</div>
 
-<div class="fab" @click="openTM()" v-if="page !== 'settings' && page !== 'stats'">
+<div class="fab" @click="openTM()" v-if="page !== 'settings' && page !== 'stats' && page !== 'aichat' && page !== 'userchat'">
   +
 </div>
 
@@ -840,6 +1015,59 @@ createApp({
       const d=await r.json();if(!r.ok)throw new Error(d.detail||'Ошибка');return d;
     }
 
+    // push notifications
+    const pushSupported=ref('serviceWorker' in navigator && 'PushManager' in window);
+    const pushSubscribed=ref(false);
+    const pushBusy=ref(false);
+    function urlBase64ToUint8Array(base64String){
+      const padding='='.repeat((4-base64String.length%4)%4);
+      const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+      const raw=atob(base64);const arr=new Uint8Array(raw.length);
+      for(let i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+      return arr;
+    }
+    async function registerSW(){
+      if(!pushSupported.value)return null;
+      try{return await navigator.serviceWorker.register('/sw.js');}catch(e){return null;}
+    }
+    async function refreshPushState(){
+      if(!pushSupported.value)return;
+      const reg=await navigator.serviceWorker.getRegistration('/sw.js');
+      const sub=reg&&await reg.pushManager.getSubscription();
+      pushSubscribed.value=!!sub;
+    }
+    async function enablePush(){
+      if(!pushSupported.value){showT('Браузер не поддерживает push-уведомления','error');return;}
+      pushBusy.value=true;
+      try{
+        const reg=await registerSW();
+        if(!reg)throw new Error('Не удалось зарегистрировать Service Worker');
+        const perm=await Notification.requestPermission();
+        if(perm!=='granted'){showT('Уведомления не разрешены в браузере','warn');pushBusy.value=false;return;}
+        const{publicKey}=await api('GET','/api/push/vapid-public-key');
+        let sub=await reg.pushManager.getSubscription();
+        if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(publicKey)});
+        const j=sub.toJSON();
+        await api('POST','/api/push/subscribe',{endpoint:j.endpoint,keys:j.keys});
+        pushSubscribed.value=true;
+        showT('Push-уведомления включены 🔔');
+      }catch(e){showT(e.message||'Не удалось включить уведомления','error');}
+      pushBusy.value=false;
+    }
+    async function disablePush(){
+      pushBusy.value=true;
+      try{
+        const reg=await navigator.serviceWorker.getRegistration('/sw.js');
+        const sub=reg&&await reg.pushManager.getSubscription();
+        if(sub){await api('POST','/api/push/unsubscribe',{endpoint:sub.endpoint});await sub.unsubscribe();}
+        pushSubscribed.value=false;
+        showT('Push-уведомления выключены','warn');
+      }catch(e){showT(e.message||'Ошибка','error');}
+      pushBusy.value=false;
+    }
+    async function togglePush(){if(pushSubscribed.value)await disablePush();else await enablePush();}
+    async function testPush(){try{await api('POST','/api/push/test');showT('Тестовое уведомление отправлено');}catch(e){showT(e.message,'error');}}
+
     // pw
     const pwPct=computed(()=>{const p=rf.value.password;if(!p)return 0;let s=0;if(p.length>=6)s+=25;if(p.length>=10)s+=25;if(/[A-Z]/.test(p))s+=25;if(/[0-9!@#$%]/.test(p))s+=25;return s;});
     const pwColor=computed(()=>{const p=pwPct.value;if(p<=25)return'#FF5B79';if(p<=50)return'#F7826A';if(p<=75)return'#F7C86A';return'#52D98A';});
@@ -869,7 +1097,12 @@ createApp({
       setupStep.value=0;setupLoading.value=false;showT('Профиль настроен!');}
 
     async function init(){try{user.value=await api('GET','/api/auth/me');cfg.value.email=user.value.email||'';
-      await Promise.all([loadSubjs(),loadTasks(),loadToday(),loadWeek(),loadWStats()]);}catch(e){logout();}}
+      await Promise.all([loadSubjs(),loadTasks(),loadToday(),loadWeek(),loadWStats(),loadNotifySettings()]);
+      await refreshPushState();}catch(e){logout();}}
+
+    async function loadNotifySettings(){try{const ns=await api('GET','/api/push/settings');
+      cfg.value.notifyDay=ns.notify_day;cfg.value.notifyUrgent=ns.notify_urgent;cfg.value.notifyOverload=ns.notify_overload;cfg.value.notifyMorning=ns.notify_morning;cfg.value.threshold=ns.overload_threshold;
+    }catch(e){}}
 
     async function loadSubjs(){subjects.value=await api('GET','/api/subjects/');}
     async function loadTasks(){loading.value=true;const all=await api('GET','/api/tasks/');tasks.value=all.filter(t=>!t.is_completed);archive.value=all.filter(t=>t.is_completed);loading.value=false;}
@@ -900,8 +1133,92 @@ createApp({
     function vTask(f){const e={};if(!f.title||!f.title.trim())e.title='Введи название';if(!f.deadline)e.deadline='Укажи дедлайн';return e;}
 
     function openTM(task=null){
-      if(task){tm.value={show:true,id:task.id,e:{},f:{title:task.title,desc:task.description||'',task_type:task.task_type,difficulty:task.difficulty,priority:task.priority||'medium',deadline:task.deadline?task.deadline.slice(0,16):'',hours:task.estimated_hours,subject_id:task.subject?task.subject.id:null}};}
-      else{const d=new Date();d.setDate(d.getDate()+1);d.setHours(23,59,0,0);tm.value={show:true,id:null,e:{},f:{title:'',desc:'',task_type:'homework',difficulty:'medium',priority:'medium',deadline:d.toISOString().slice(0,16),hours:1,subject_id:null}};}
+      if(task){tm.value={show:true,id:task.id,e:{},aiText:'',aiLoading:false,aiError:'',descLoading:false,f:{title:task.title,desc:task.description||'',task_type:task.task_type,difficulty:task.difficulty,priority:task.priority||'medium',deadline:task.deadline?task.deadline.slice(0,16):'',hours:task.estimated_hours,subject_id:task.subject?task.subject.id:null}};}
+      else{const d=new Date();d.setDate(d.getDate()+1);d.setHours(23,59,0,0);tm.value={show:true,id:null,e:{},aiText:'',aiLoading:false,aiError:'',descLoading:false,f:{title:'',desc:'',task_type:'homework',difficulty:'medium',priority:'medium',deadline:d.toISOString().slice(0,16),hours:1,subject_id:null}};}
+    }
+    async function parseAI(){
+      if(!tm.value.aiText?.trim())return;
+      tm.value.aiLoading=true;tm.value.aiError='';
+      try{
+        const d=await api('POST','/api/tasks/parse',{text:tm.value.aiText});
+        const f=tm.value.f;
+        if(d.title)f.title=d.title;
+        if(d.description)f.desc=d.description;
+        if(d.task_type)f.task_type=d.task_type;
+        if(d.priority)f.priority=d.priority;
+        if(d.estimated_hours)f.hours=d.estimated_hours;
+        if(d.deadline)f.deadline=new Date(d.deadline).toISOString().slice(0,16);
+        showT('Поля заполнены с помощью AI ✨');
+      }catch(e){tm.value.aiError=e.message||'Ошибка AI-разбора';}
+      tm.value.aiLoading=false;
+    }
+    async function describeTask(){
+      if(!tm.value.f.title)return;
+      tm.value.descLoading=true;
+      try{
+        const subj=subjects.value.find(s=>s.id===tm.value.f.subject_id);
+        const d=await api('POST','/api/tasks/describe',{title:tm.value.f.title,task_type:tm.value.f.task_type,subject_name:subj?.name||null,difficulty:tm.value.f.difficulty});
+        if(d.description)tm.value.f.desc=d.description;
+        showT('Описание сгенерировано ✨');
+      }catch(e){showT(e.message||'Ошибка генерации','error');}
+      tm.value.descLoading=false;
+    }
+    const aiHints=ref([]);const hintsLoading=ref(false);
+
+    // ── AI Chat ────────────────────────────────────────────────────────────
+    const aiModel=ref('qwen2.5');
+    const aiMessages=ref([]);
+    const aiInput=ref('');
+    const aiTyping=ref(false);
+    const aiChatBox=ref(null);
+    const aiSuggestions=['Куда лучше поставить новую задачу?','Покажи расписание на неделю','Какие задачи просрочены?','Перенеси самую тяжёлую задачу'];
+
+    function _scrollChat(boxRef){nextTick(()=>{if(boxRef.value)boxRef.value.scrollTop=boxRef.value.scrollHeight;});}
+
+    async function sendAI(text=null){
+      const msg=(text||aiInput.value).trim();if(!msg)return;
+      aiInput.value='';
+      aiMessages.value.push({role:'user',content:msg});
+      aiTyping.value=true;
+      _scrollChat(aiChatBox);
+      try{
+        const d=await api('POST','/api/chat/ai',{message:msg});
+        aiMessages.value.push({role:'assistant',content:d.reply,action_result:d.action_result||null});
+        if(d.action_result)await refresh();
+      }catch(e){aiMessages.value.push({role:'assistant',content:'❌ Ошибка: '+(e.message||'AI недоступен')});}
+      aiTyping.value=false;
+      _scrollChat(aiChatBox);
+    }
+
+    async function clearAIChat(){
+      if(!confirm('Очистить историю AI-чата?'))return;
+      try{await api('DELETE','/api/chat/ai/history');}catch{}
+      aiMessages.value=[];
+    }
+
+    // ── User Chat ──────────────────────────────────────────────────────────
+    const userMessages=ref([]);
+    const userMsgInput=ref('');
+    const userChatBox=ref(null);
+    let _chatPoll=null;
+
+    async function loadUserMsgs(){
+      try{userMessages.value=await api('GET','/api/chat/messages');}catch{}
+    }
+
+    async function sendUserMsg(){
+      const msg=userMsgInput.value.trim();if(!msg)return;
+      userMsgInput.value='';
+      try{await api('POST','/api/chat/messages',{content:msg});await loadUserMsgs();_scrollChat(userChatBox);}
+      catch(e){showT(e.message||'Ошибка отправки','error');}
+    }
+
+    function fmtMsgTime(iso){const d=new Date(iso);return`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;}
+
+    async function loadAIHints(){
+      hintsLoading.value=true;
+      try{const d=await api('GET','/api/tasks/hints');aiHints.value=d.hints||[];}catch(e){}
+      hintsLoading.value=false;
     }
     async function saveTask(){const f=tm.value.f;const e=vTask(f);if(Object.keys(e).length){tm.value.e=e;return;}
       try{const b={title:f.title,description:f.desc,task_type:f.task_type,difficulty:f.difficulty,priority:f.priority||'medium',deadline:new Date(f.deadline).toISOString(),estimated_hours:f.hours,subject_id:f.subject_id};
@@ -920,7 +1237,9 @@ createApp({
     async function saveSubj(){if(!sm.value.f.name)return;try{if(sm.value.id)await api('PUT',`/api/subjects/${sm.value.id}`,sm.value.f);else await api('POST','/api/subjects/',sm.value.f);sm.value.show=false;openSubjModal.value=false;await loadSubjs();showT('Предмет сохранён');}catch(e){showT(e.message,'error');}}
     async function delSubj(id){if(!confirm('Удалить предмет?'))return;await api('DELETE',`/api/subjects/${id}`);await loadSubjs();showT('Удалено','warn');}
 
-    function saveCfg(){localStorage.setItem('sb_cfg',JSON.stringify(cfg.value));showT('Настройки сохранены');}
+    async function saveCfg(){localStorage.setItem('sb_cfg',JSON.stringify(cfg.value));
+      if(token.value){try{await api('PUT','/api/push/settings',{notify_day:cfg.value.notifyDay,notify_urgent:cfg.value.notifyUrgent,notify_overload:cfg.value.notifyOverload,notify_morning:cfg.value.notifyMorning,overload_threshold:cfg.value.threshold});}catch(e){}}
+      showT('Настройки сохранены');}
     async function clearArchive(){if(!confirm('Удалить все выполненные задачи?'))return;for(const t of archive.value)await api('DELETE',`/api/tasks/${t.id}`);await refresh();showT('Архив очищен','warn');}
 
     function exportBk(){const d={exported_at:new Date().toISOString(),user:user.value?.username,tasks:allTasks.value,subjects:subjects.value};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`studybalance_${new Date().toISOString().slice(0,10)}.json`;a.click();showT('Копия скачана');}
@@ -1009,8 +1328,17 @@ createApp({
     function priLabel(p){const PL={low:'Низкий',medium:'Средний',high:'Высокий'};return PL[p]||'Средний';}
     const PL={low:'Низкий',medium:'Средний',high:'Высокий'};
 
-    watch(page,async val=>{if(val==='stats')await loadStats();});
-    onMounted(async()=>{const s=localStorage.getItem('sb_cfg');if(s)try{Object.assign(cfg.value,JSON.parse(s));}catch{}if(token.value)await init();});
+    watch(page,async val=>{
+      clearInterval(_chatPoll);
+      if(val==='stats'){await loadStats();await loadAIHints();}
+      if(val==='userchat'){
+        await loadUserMsgs();_scrollChat(userChatBox);
+        _chatPoll=setInterval(async()=>{if(page.value==='userchat'){await loadUserMsgs();}},4000);
+      }
+    });
+    onMounted(async()=>{const s=localStorage.getItem('sb_cfg');if(s)try{Object.assign(cfg.value,JSON.parse(s));}catch{}
+      await registerSW();
+      if(token.value)await init();else await refreshPushState();});
 
     return{
       token,user,page,loading,authTab,authLoading,authError,lf,le,rf,re,showPw,
@@ -1024,10 +1352,13 @@ createApp({
       overdueTasks,weekInsight,subjectInsight,completionInsight,hoursInsight,recommendations,
       isOverdue,overdueAgo,priColor,priLabel,PL,
       doLogin,doRegister,logout,goSubjects,finishSetup,
-      openTM,saveTask,toggleTask,delTask,openXfer,doXfer,
+      openTM,saveTask,toggleTask,delTask,openXfer,doXfer,parseAI,describeTask,loadAIHints,aiHints,hintsLoading,
       openSM,saveSubj,delSubj,doSearch,isToday,lc,fmtDL,dlClass,
       TL,DL,typeClass,diffClass,loadStats,exportCSV,exportBk,importBk,dlChart,saveCfg,clearArchive,
       calPrev,calNext,calToday,calCellClick,
+      aiModel,aiMessages,aiInput,aiTyping,aiChatBox,aiSuggestions,sendAI,clearAIChat,
+      userMessages,userMsgInput,userChatBox,sendUserMsg,fmtMsgTime,
+      pushSupported,pushSubscribed,pushBusy,togglePush,testPush,
     };
   }
 }).mount('#app');

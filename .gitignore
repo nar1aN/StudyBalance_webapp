@@ -10,6 +10,7 @@ venv/
 
 
 .env
+backend/vapid_private_key.pem
 
 
 .vscode/

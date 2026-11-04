@@ -8,7 +8,7 @@ from ..auth import hash_password, verify_password, create_access_token
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
-DEFAULT_SUBJECTS = [
+default_subjects = [
     ("Математика", "#E74C3C"),
     ("Русский язык", "#3498DB"),
     ("Литература", "#9B59B6"),
@@ -27,20 +27,22 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(400, "Username already taken")
     if db.query(User).filter(User.email == data.email).first():
         raise HTTPException(400, "Email already registered")
+
     user = User(username=data.username, email=data.email, hashed_password=hash_password(data.password))
     db.add(user)
     db.flush()
-    for name, color in DEFAULT_SUBJECTS:
+
+    for name, color in default_subjects:
         db.add(Subject(name=name, color=color, user_id=user.id))
+
     db.commit()
     db.refresh(user)
     return user
-
 @router.post("/login", response_model=Token)
 def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == form.username).first()
     if not user or not verify_password(form.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    token = create_access_token({"sub": user.username})
-    return {"access_token": token, "token_type": "bearer"}
 
+    token = create_access_token({"sub": user.username})
+    return {"access_token": token, "token_type": "bearer"}1
