@@ -219,6 +219,13 @@ select option{background:var(--bg3)}
 .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .sett-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
 .sett-title{font-size:14px;font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.help-wrap{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.help-card{scroll-margin-top:20px}
+.help-card p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px}
+.help-card ol,.help-card ul{font-size:13px;color:var(--text2);line-height:1.7;padding-left:20px;margin-bottom:10px}
+.help-card b{color:var(--text)}
+.help-card .help-q{font-size:13px;font-weight:700;color:var(--text);margin:12px 0 4px}
+.help-tip{font-size:12px;color:var(--text2);background:var(--bg3);border-radius:8px;padding:8px 10px;line-height:1.5}
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(42,51,86,.4)}
 .tgl-lbl{font-size:14px}.tgl-sub{font-size:12px;color:var(--text2);margin-top:2px}
 .toggle{position:relative;width:40px;height:22px;cursor:pointer}
@@ -405,6 +412,9 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
     <div class="nav-icon-btn" :class="{active:page==='userchat'}" @click="page='userchat'" title="Чат">
       <span>💬</span><span class="nav-tooltip">Чат</span>
     </div>
+    <div class="nav-icon-btn" :class="{active:page==='help'}" @click="page='help'" title="Помощь">
+      <span>❓</span><span class="nav-tooltip">Помощь</span>
+    </div>
     <div class="sidebar-spacer"></div>
     <div class="sidebar-avatar" @click="page='settings'" :title="user?.username">
       {{user?.username?.[0]?.toUpperCase()||'?'}}
@@ -471,6 +481,14 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
       </div>
       <div style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--border)">
         <button class="btn btn-ghost btn-sm" style="width:100%;font-size:12px" @click="clearAIChat">🗑 Очистить историю</button>
+      </div>
+    </div>
+
+    <!-- LEFT PANEL: Help -->
+    <div v-if="page==='help'" class="left-panel">
+      <div class="left-panel-header">Помощь</div>
+      <div v-for="h in helpTopics" :key="h.id" class="left-nav-item" :class="{active:helpTab===h.id}" @click="helpGo(h.id)">
+        <span class="left-nav-icon">{{h.icon}}</span> {{h.title}}
       </div>
     </div>
 
@@ -765,6 +783,112 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
         </div>
       </div>
 
+      <!-- HELP PAGE -->
+      <div v-if="page==='help'" class="page">
+        <div class="page-title">Помощь</div>
+        <div class="help-wrap">
+          <div id="help-start" class="sett-card help-card">
+            <div class="sett-title">🚀 С чего начать</div>
+            <p>StudyBalance помогает распределять учебную нагрузку по дням, чтобы не было перегруза перед дедлайнами.</p>
+            <ol>
+              <li>Добавь свои предметы (или выбери их при первом входе).</li>
+              <li>Заноси задачи с дедлайном и примерным временем на выполнение.</li>
+              <li>Следи за нагрузкой на странице <b>◆ Сегодня</b> и в <b>📅 Календаре</b>.</li>
+              <li>Отмечай выполненное — задачи уходят в архив, а статистика обновляется.</li>
+            </ol>
+            <div class="help-tip">Меню слева: ☰ Задачи · 📅 Календарь · ◆ Сегодня · 🔍 Поиск · 📊 Статистика · 🤖 AI Ассистент · 💬 Чат · ❓ Помощь. Кружок с буквой внизу — настройки.</div>
+          </div>
+          <div id="help-tasks" class="sett-card help-card">
+            <div class="sett-title">📝 Задачи</div>
+            <div class="help-q">Как добавить задачу?</div>
+            <ol>
+              <li>Нажми круглую кнопку <b>+</b> в правом нижнем углу (есть на страницах Задачи, Сегодня, Календарь, Поиск).</li>
+              <li>Заполни <b>Название</b> и <b>Дедлайн</b> — это обязательные поля.</li>
+              <li>При желании укажи предмет, тип, сложность, приоритет и <b>Время (ч)</b> — сколько часов уйдёт на задачу.</li>
+              <li>Нажми <b>Создать</b>.</li>
+            </ol>
+            <p>Можно быстрее: в блоке <b>✨ Быстрый ввод с AI</b> напиши задачу обычным текстом, например «доклад по истории в пятницу, часа на 3», и нажми <b>Разобрать</b> — поля заполнятся сами. Кнопка <b>✨ Расписать</b> у описания предложит план выполнения.</p>
+            <div class="help-q">Как изменить, выполнить или удалить?</div>
+            <ul>
+              <li><b>Выполнить</b> — нажми на кружок слева от задачи. Повторное нажатие вернёт её в активные.</li>
+              <li><b>Изменить</b> — ✏️ справа от задачи.</li>
+              <li><b>Перенести</b> — 📆, затем выбери день. 🟢 — свободный день, ⚡ — уже перегружен.</li>
+              <li><b>Удалить</b> — 🗑.</li>
+            </ul>
+            <div class="help-tip">Слева на странице Задачи есть фильтры: Сегодня, Следующие 7 дней, Просроченные, Архив и отдельные предметы.</div>
+          </div>
+          <div id="help-load" class="sett-card help-card">
+            <div class="sett-title">⚖️ Нагрузка и перегруз</div>
+            <p>Нагрузка дня — это сумма часов всех задач с дедлайном в этот день.</p>
+            <div class="help-q">Как изменить максимум часов в день?</div>
+            <ol>
+              <li>Нажми на кружок с первой буквой своего имени внизу меню — откроются <b>Настройки</b>.</li>
+              <li>Во вкладке <b>👤 Профиль</b> найди поле <b>Порог перегруза (ч/день)</b>.</li>
+              <li>Укажи нужное значение (от 2 до 10 ч, шаг 0.5) и нажми <b>Сохранить</b>.</li>
+            </ol>
+            <p>Дни, где часов больше порога, считаются перегруженными: они подсвечиваются и по ним приходят предупреждения (если включены уведомления о перегрузе).</p>
+            <div class="help-q">День перегружен — что делать?</div>
+            <p>Перенеси часть задач через 📆 на свободные дни или спроси AI Ассистента: «Куда лучше поставить новую задачу?».</p>
+          </div>
+          <div id="help-subjects" class="sett-card help-card">
+            <div class="sett-title">📚 Предметы</div>
+            <ul>
+              <li><b>Добавить</b> — кнопка <b>+ Предмет</b> внизу панели Задачи или в Настройки → Предметы.</li>
+              <li><b>Изменить название или цвет</b> — Настройки → Предметы → ✏️.</li>
+              <li><b>Удалить</b> — Настройки → Предметы → 🗑.</li>
+            </ul>
+            <div class="help-tip">Цвет предмета используется в тегах задач и в календаре — так проще ориентироваться.</div>
+          </div>
+          <div id="help-calendar" class="sett-card help-card">
+            <div class="sett-title">📅 Календарь и «Сегодня»</div>
+            <ul>
+              <li>В календаре стрелками ‹ › листаются месяцы.</li>
+              <li>Клик по пустому дню — создать задачу, по дню с одной задачей — открыть её.</li>
+              <li>На странице <b>◆ Сегодня</b> — полоса недели с нагрузкой, задачи на сегодня и выполненные за день.</li>
+            </ul>
+          </div>
+          <div id="help-notify" class="sett-card help-card">
+            <div class="sett-title">🔔 Уведомления</div>
+            <ol>
+              <li>Открой Настройки → <b>🔔 Уведомления</b>.</li>
+              <li>Включи <b>Push-уведомления в браузере</b> и разреши их, когда браузер спросит.</li>
+              <li>Выбери, о чём напоминать: за день до дедлайна, за 2 часа, о перегрузе, утренняя сводка.</li>
+              <li>Нажми <b>Сохранить</b>. Проверить можно кнопкой «Отправить тестовое уведомление».</li>
+            </ol>
+            <div class="help-q">Уведомления не приходят?</div>
+            <ul>
+              <li>Проверь, что уведомления для сайта разрешены в настройках браузера.</li>
+              <li>Если написано, что браузер не поддерживает push, — открой сайт в Chrome, Edge или Firefox.</li>
+              <li>На iPhone сначала добавь сайт на экран «Домой».</li>
+            </ul>
+          </div>
+          <div id="help-ai" class="sett-card help-card">
+            <div class="sett-title">🤖 AI Ассистент и чат</div>
+            <p><b>AI Ассистент</b> знает твои задачи: можно попросить показать расписание, добавить или перенести задачу, подсказать, что делать сначала. Готовые вопросы есть слева. «🗑 Очистить историю» удаляет переписку с ассистентом.</p>
+            <p><b>💬 Чат</b> — общая беседа с другими пользователями, сообщения обновляются каждые несколько секунд.</p>
+          </div>
+          <div id="help-stats" class="sett-card help-card">
+            <div class="sett-title">📊 Статистика, поиск и резервная копия</div>
+            <ul>
+              <li><b>Статистика</b> — графики нагрузки, просроченные задачи и рекомендации. 💾 у графика сохраняет его картинкой, <b>⬇ CSV</b> — выгружает задачи в таблицу. «↻ Обновить» в AI Советнике даёт свежие советы.</li>
+              <li><b>Поиск</b> — начни вводить название задачи, результаты появятся сразу.</li>
+              <li><b>Резервная копия</b> — Настройки → 💾 Резервная копия → «Скачать резервную копию (JSON)».</li>
+            </ul>
+          </div>
+          <div id="help-faq" class="sett-card help-card">
+            <div class="sett-title">❔ Частые вопросы</div>
+            <div class="help-q">Задача стала просроченной.</div>
+            <p>Она в разделе Задачи → Просроченные и на странице Статистики. Выполни её или перенеси через 📆.</p>
+            <div class="help-q">Где выполненные задачи?</div>
+            <p>В Задачи → Архив. Очистить архив можно в Настройки → Профиль → «Очистить архив» (действие необратимо).</p>
+            <div class="help-q">Изменил настройки, но ничего не поменялось.</div>
+            <p>Не забудь нажать <b>Сохранить</b> внизу карточки настроек.</p>
+            <div class="help-q">Как выйти из аккаунта?</div>
+            <p>Настройки → Профиль → «Выйти из аккаунта».</p>
+          </div>
+        </div>
+      </div>
+
       <!-- AI CHAT PAGE -->
       <div v-if="page==='aichat'" class="chat-page">
         <div class="chat-hdr">
@@ -896,7 +1020,7 @@ input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radiu
 <!-- TOAST -->
 <div v-if="toast.show" class="toast" :class="toast.type">{{toast.msg}}</div>
 
-<div class="fab" @click="openTM()" v-if="page !== 'settings' && page !== 'stats' && page !== 'aichat' && page !== 'userchat'">
+<div class="fab" @click="openTM()" v-if="page !== 'settings' && page !== 'stats' && page !== 'aichat' && page !== 'userchat' && page !== 'help'">
   +
 </div>
 
@@ -914,6 +1038,19 @@ createApp({
     const taskView=ref('today');
     const settTab=ref('profile');
     const filterSubj=ref(null);
+    const helpTab=ref('start');
+    const helpTopics=[
+      {id:'start',icon:'🚀',title:'С чего начать'},
+      {id:'tasks',icon:'📝',title:'Задачи'},
+      {id:'load',icon:'⚖️',title:'Нагрузка и перегруз'},
+      {id:'subjects',icon:'📚',title:'Предметы'},
+      {id:'calendar',icon:'📅',title:'Календарь'},
+      {id:'notify',icon:'🔔',title:'Уведомления'},
+      {id:'ai',icon:'🤖',title:'AI и чат'},
+      {id:'stats',icon:'📊',title:'Статистика и копия'},
+      {id:'faq',icon:'❔',title:'Частые вопросы'},
+    ];
+    function helpGo(id){helpTab.value=id;document.getElementById('help-'+id)?.scrollIntoView({behavior:'smooth',block:'start'});}
 
     // auth
     const authTab=ref('login');
@@ -1344,7 +1481,7 @@ createApp({
       token,user,page,loading,authTab,authLoading,authError,lf,le,rf,re,showPw,
       setupStep,selProfile,profiles,setupSubjs,setupLoading,
       tasks,archive,todayTasks,weekTasks,subjects,wStats,subjStats,allTasks,
-      srch,searchResults,taskView,settTab,filterSubj,currentTasks,
+      srch,searchResults,taskView,settTab,filterSubj,currentTasks,helpTab,helpTopics,helpGo,
       wc,sc,dc,hc,tm,sm,xfer,xferDays,openSubjModal,
       activeToday,doneToday,showDone,cfg,toast,
       todayNum,todayWd,todayMon,todayH,pwPct,pwColor,pwLabel,
