@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+<title>StudyBalance</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;900&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0C0F1A;--bg2:#131726;--bg3:#1A2035;--card:#1E2540;
+  --border:#2A3356;--accent:#7C6AF7;--accent2:#5CE0D8;--accent3:#F7826A;
+  --text:#E8EAFF;--text2:#8B93C4;--text3:#4A5280;
+  --warn:#F7826A;--danger:#FF5B79;--green:#52D98A;
+  --sidebar-w:64px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Onest',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* AUTH */
+.auth-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--bg)}
+.abc{position:absolute;border-radius:50%;filter:blur(90px);opacity:.1}
+.abc:nth-child(1){width:600px;height:600px;background:var(--accent);top:-200px;left:-100px}
+.abc:nth-child(2){width:400px;height:400px;background:var(--accent2);bottom:-100px;right:-50px}
+.abc:nth-child(3){width:300px;height:300px;background:var(--accent3);top:40%;left:40%}
+.auth-card{position:relative;z-index:1;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:48px;width:440px;box-shadow:0 32px 80px rgba(0,0,0,.5)}
+.auth-logo{font-family:'Unbounded',sans-serif;font-size:22px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+.auth-tagline{color:var(--text2);font-size:14px;margin-bottom:36px}
+.auth-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:28px}
+.auth-tab{flex:1;padding:10px;text-align:center;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);transition:all .2s}
+.auth-tab.active{background:var(--accent);color:#fff}
+
+/* SETUP */
+.setup-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden}
+.setup-card{position:relative;z-index:1;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:48px;width:560px;box-shadow:0 32px 80px rgba(0,0,0,.5);max-height:90vh;overflow-y:auto}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s;display:inline-block;margin-right:6px}
+.step-dot.active{background:var(--accent);width:24px;border-radius:4px}
+.step-dot.done{background:var(--green)}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.profile-opt{padding:16px;background:var(--bg3);border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:center;transition:all .2s}
+.profile-opt:hover{border-color:var(--accent)}
+.profile-opt.selected{border-color:var(--accent);background:rgba(124,106,247,.15)}
+.subj-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:320px;overflow-y:auto;margin-bottom:20px}
+.subj-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s}
+.subj-item.selected{border-color:var(--accent);background:rgba(124,106,247,.1)}
+
+/* FORMS */
+.form-group{margin-bottom:16px}
+label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px}
+input,select,textarea{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input.err{border-color:var(--danger)!important}
+select option{background:var(--bg3)}
+.field-error{font-size:12px;color:var(--danger);margin-top:4px}
+.field-hint{font-size:12px;color:var(--text3);margin-top:4px}
+.pw-bar{height:3px;border-radius:2px;margin-top:6px;transition:all .3s}
+.error-msg{color:var(--danger);font-size:13px;margin-top:12px;text-align:center;padding:10px;background:rgba(255,91,121,.08);border-radius:8px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;transition:all .2s}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff;width:100%;padding:14px}
+.btn-primary:hover:not(:disabled){background:#6C5CF0;transform:translateY(-1px)}
+.btn-sm{padding:7px 12px;font-size:13px}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+.btn-danger{background:rgba(255,91,121,.15);color:var(--danger);border:1px solid rgba(255,91,121,.2)}
+.btn-danger:hover{background:rgba(255,91,121,.25)}
+.btn-teal{background:rgba(92,224,216,.15);color:var(--accent2);border:1px solid rgba(92,224,216,.2)}
+
+/* APP LAYOUT */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0;z-index:10}
+.sidebar-logo{font-family:'Unbounded',sans-serif;font-size:11px;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:24px;text-align:center;line-height:1.2;padding:0 6px}
+.nav-icon-btn{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;transition:all .2s;margin-bottom:4px;position:relative}
+.nav-icon-btn:hover{background:rgba(124,106,247,.15)}
+.nav-icon-btn.active{background:rgba(124,106,247,.2)}
+.nav-icon-btn.active::before{content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:3px;height:24px;background:var(--accent);border-radius:0 3px 3px 0}
+.nav-tooltip{position:absolute;left:calc(var(--sidebar-w) + 8px);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;white-space:nowrap;z-index:100;pointer-events:none;opacity:0;transition:opacity .15s}
+.nav-icon-btn:hover .nav-tooltip{opacity:1}
+.sidebar-spacer{flex:1}
+.sidebar-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;cursor:pointer;transition:all .2s;margin-top:8px}
+.sidebar-avatar:hover{transform:scale(1.05)}
+
+/* MAIN AREA */
+.main-area{flex:1;display:flex;overflow:hidden}
+
+/* LEFT PANEL (tasks list) */
+.left-panel{width:260px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.left-panel-header{padding:20px 16px 12px;font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700}
+.left-nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;margin:1px 8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);transition:all .2s}
+.left-nav-item:hover{background:rgba(124,106,247,.08);color:var(--text)}
+.left-nav-item.active{background:rgba(124,106,247,.12);color:var(--text)}
+.left-nav-icon{font-size:15px;flex-shrink:0}
+.left-nav-badge{margin-left:auto;background:var(--bg3);color:var(--text3);font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px}
+.left-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);padding:12px 16px 4px}
+.subj-btn{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;margin:1px 8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .2s}
+.subj-btn:hover{background:rgba(124,106,247,.08);color:var(--text)}
+.subj-btn.active{color:var(--text)}
+.subj-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.left-nav-badge.red{background:rgba(255,91,121,.15);color:var(--danger)}
+.task-item.overdue-item{border-left:3px solid var(--danger);padding-left:9px}
+.priority-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+.chart-insight{font-size:12px;color:var(--text2);margin-bottom:12px;padding:8px 10px;background:var(--bg3);border-radius:8px;line-height:1.5}
+.reco-card{background:linear-gradient(135deg,rgba(124,106,247,.08),rgba(92,224,216,.05));border:1px solid rgba(124,106,247,.2);border-radius:14px;padding:18px;margin-bottom:22px}
+.reco-title{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.reco-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(42,51,86,.4);font-size:13px;color:var(--text2);line-height:1.5}
+.reco-item:last-child{border-bottom:none}
+.reco-icon{flex-shrink:0;font-size:15px}
+.overdue-section{background:rgba(255,91,121,.05);border:1px solid rgba(255,91,121,.15);border-radius:14px;padding:16px;margin-bottom:22px}
+.overdue-title{font-size:13px;font-weight:700;color:var(--danger);margin-bottom:12px}
+.stat-card.cd::before{background:var(--danger)}
+.dp-btn.free{border-color:rgba(82,217,138,.4)}
+
+
+/* RIGHT PANEL (content) */
+.right-panel{flex:1;overflow-y:auto;background:var(--bg)}
+
+/* PAGE */
+.page{padding:28px 48px;animation:fadeIn .25s ease}
+.page-title{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:700;margin-bottom:20px}
+
+/* TASK LIST PAGE */
+.task-section-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.task-section-title:hover{color:var(--text)}
+.add-task-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;border:1px dashed var(--border);color:var(--text3);font-size:14px;cursor:pointer;transition:all .2s;margin-bottom:16px;background:transparent;width:100%;font-family:inherit}
+.add-task-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(124,106,247,.05)}
+.task-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;transition:all .15s;cursor:pointer;margin-bottom:2px}
+.task-item:hover{background:var(--bg3)}
+.task-item.done{opacity:.45}
+.task-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.task-check.checked{background:var(--green);border-color:var(--green)}
+.ck{color:#fff;font-size:10px}
+.task-info{flex:1;min-width:0}
+.task-title{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-item.done .task-title{text-decoration:line-through}
+.task-tags{display:flex;gap:5px;margin-top:3px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;background:rgba(124,106,247,.12);color:var(--accent)}
+.tag.th{background:rgba(92,224,216,.1);color:var(--accent2)}
+.tag.tt{background:rgba(247,130,106,.1);color:var(--accent3)}
+.tag.tp{background:rgba(124,106,247,.1);color:var(--accent)}
+.tag.to{background:rgba(247,200,106,.1);color:#F7C86A}
+.tag.ts{background:rgba(82,217,138,.1);color:var(--green)}
+.tag.de{background:rgba(82,217,138,.1);color:var(--green)}
+.tag.dm{background:rgba(247,200,106,.1);color:#F7C86A}
+.tag.dh{background:rgba(255,91,121,.1);color:var(--danger)}
+.dl{font-size:11px;color:var(--text3);flex-shrink:0}
+.dl.soon{color:var(--warn);font-weight:600}
+.dl.overdue{color:var(--danger);font-weight:700}
+.task-actions{display:flex;gap:4px;opacity:0;transition:opacity .15s;flex-shrink:0}
+.task-item:hover .task-actions{opacity:1}
+.icon-btn{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:all .2s;background:transparent;border:none;color:var(--text2)}
+.icon-btn:hover{background:var(--bg2);color:var(--text)}
+
+/* TODAY PAGE */
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:24px}
+.week-day{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s}
+.week-day.today{border-color:var(--accent);background:rgba(124,106,247,.1)}
+.week-day.overloaded{border-color:var(--warn)}
+.week-day-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px}
+.week-day-num{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;margin-bottom:6px}
+.week-day.today .week-day-num{color:var(--accent)}
+.week-day-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.week-day-fill{height:100%;border-radius:2px}
+.lo{background:var(--green)}.lw{background:var(--warn)}.lc{background:var(--danger)}
+.week-day-count{font-size:10px;color:var(--text3)}
+.today-section{margin-bottom:24px}
+.today-section-hdr{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.load-info{font-size:12px;padding:4px 10px;border-radius:6px;font-weight:600}
+.load-ok-badge{background:rgba(82,217,138,.1);color:var(--green)}
+.load-warn-badge{background:rgba(247,130,106,.1);color:var(--warn)}
+
+/* CALENDAR PAGE */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.cal-title{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:700}
+.cal-nav{display:flex;align-items:center;gap:10px;min-width:260px}
+.cal-nav-btn{width:36px;height:36px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text2);transition:all .2s;flex-shrink:0}
+.cal-nav-btn:hover{background:var(--bg3);color:var(--text)}
+.cal-nav-label{flex:1;min-width:140px;height:36px;padding:0 18px;border-radius:10px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--text);text-align:center;white-space:nowrap}
+.cal-grid-header{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px}
+.cal-day-name{text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);padding:8px 0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-cell{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px;min-height:100px;transition:border-color .2s;cursor:pointer}
+.cal-cell:hover{border-color:rgba(124,106,247,.4)}
+.cal-cell.today{border-color:var(--accent)}
+.cal-cell.other-month{opacity:.35}
+.cal-cell.has-tasks{border-color:rgba(124,106,247,.25)}
+.cal-num{font-size:13px;font-weight:700;margin-bottom:6px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.cal-cell.today .cal-num{background:var(--accent);color:#fff}
+.cal-chip{font-size:10px;padding:2px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-more{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card.ca::before{background:var(--accent)}.stat-card.ct::before{background:var(--accent2)}
+.stat-card.co::before{background:var(--accent3)}.stat-card.cg::before{background:var(--green)}
+.stat-val{font-family:'Unbounded',sans-serif;font-size:26px;font-weight:700;margin-bottom:4px}
+.stat-lbl{font-size:12px;color:var(--text2)}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+.chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.chart-lbl{font-size:13px;font-weight:600;color:var(--text2)}
+.chart-dl{font-size:12px;color:var(--text3);cursor:pointer;transition:color .2s}
+.chart-dl:hover{color:var(--accent2)}
+.chart-wrap{position:relative;height:200px}
+
+/* SEARCH */
+.search-bar{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:20px}
+.search-bar input{background:transparent;border:none;font-size:15px;flex:1;color:var(--text)}
+.search-bar input::placeholder{color:var(--text3)}
+
+/* SETTINGS */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sett-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.sett-title{font-size:14px;font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.help-wrap{display:flex;flex-direction:column;gap:14px;max-width:760px}
+.help-card{scroll-margin-top:20px}
+.help-card p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px}
+.help-card ol,.help-card ul{font-size:13px;color:var(--text2);line-height:1.7;padding-left:20px;margin-bottom:10px}
+.help-card b{color:var(--text)}
+.help-card .help-q{font-size:13px;font-weight:700;color:var(--text);margin:12px 0 4px}
+.help-tip{font-size:12px;color:var(--text2);background:var(--bg3);border-radius:8px;padding:8px 10px;line-height:1.5}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(42,51,86,.4)}
+.tgl-lbl{font-size:14px}.tgl-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.toggle{position:relative;width:40px;height:22px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.tgl-track{position:absolute;inset:0;background:var(--bg3);border-radius:11px;transition:.3s;border:1px solid var(--border)}
+.toggle input:checked~.tgl-track{background:var(--accent);border-color:var(--accent)}
+.tgl-thumb{position:absolute;top:3px;left:3px;width:14px;height:14px;background:#fff;border-radius:50%;transition:.3s}
+.toggle input:checked~.tgl-track .tgl-thumb{left:21px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:500px;box-shadow:0 32px 80px rgba(0,0,0,.5);max-height:90vh;overflow-y:auto;animation:slideUp .2s ease}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.modal-title{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:700}
+.modal-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;line-height:1;padding:4px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+.ai-parse-block{background:linear-gradient(135deg,rgba(124,106,247,.08),rgba(92,224,216,.06));border:1px solid rgba(124,106,247,.25);border-radius:14px;padding:14px 16px;margin-bottom:18px}
+.ai-parse-label{font-size:12px;font-weight:700;color:var(--accent2);letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-parse-row{display:flex;gap:8px;align-items:flex-end}
+.ai-parse-row textarea{flex:1;resize:none;font-size:13px;background:rgba(255,255,255,.04);border-color:rgba(124,106,247,.3)}
+.btn-ai{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;flex-shrink:0;width:80px;height:68px;padding:0;font-size:12px;font-weight:700;line-height:1.3;border-radius:10px}
+.btn-ai:hover:not(:disabled){opacity:.88;transform:translateY(-1px)}
+.btn-ai:disabled{opacity:.45;cursor:not-allowed}
+.ai-divider{display:flex;align-items:center;gap:8px;margin:14px 0 2px;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.ai-divider::before,.ai-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* MISC */
+.empty{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-icon{font-size:44px;margin-bottom:10px}
+.empty-title{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--text2)}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-right:10px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 18px;font-size:14px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:2000;animation:slideUp .3s ease}
+.toast.success{border-color:rgba(82,217,138,.4);color:var(--green)}
+.toast.error{border-color:rgba(255,91,121,.4);color:var(--danger)}
+.toast.warn{border-color:rgba(247,130,106,.4);color:var(--warn)}
+.hbadge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(124,106,247,.1);color:var(--accent)}
+input[type=color]{width:40px;height:34px;padding:2px;cursor:pointer;border-radius:8px}
+.warn-box{background:rgba(247,130,106,.1);border:1px solid rgba(247,130,106,.3);border-radius:10px;padding:12px;font-size:13px;color:var(--warn);margin-bottom:14px}
+.day-pick{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:14px 0}
+.dp-btn{padding:8px 4px;background:var(--bg3);border:2px solid var(--border);border-radius:10px;cursor:pointer;text-align:center;transition:all .2s;font-family:'Onest',sans-serif}
+.dp-btn:hover{border-color:var(--accent)}.dp-btn.selected{background:rgba(124,106,247,.2);border-color:var(--accent);color:var(--accent)}.dp-btn.overloaded{border-color:rgba(247,130,106,.5)}
+.dp-name{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
+.dp-date{font-size:15px;font-weight:700}.dp-hours{font-size:9px;color:var(--text3);margin-top:2px}
+
+
+/* CHAT */
+.right-panel.chat-mode{overflow:hidden}
+.chat-page{display:flex;flex-direction:column;height:100%}
+.chat-hdr{padding:16px 24px;font-family:'Unbounded',sans-serif;font-size:16px;font-weight:700;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:10px}
+.cmrow{display:flex;flex-direction:column;max-width:74%}
+.cmrow.mine{align-self:flex-end;align-items:flex-end}
+.cmrow.theirs{align-self:flex-start;align-items:flex-start}
+.cbubble{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.6;word-break:break-word;white-space:pre-wrap}
+.cbubble.mine{background:linear-gradient(135deg,var(--accent),#6055e0);color:#fff;border-bottom-right-radius:4px}
+.cbubble.theirs{background:var(--card);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+.cbubble.typing{display:flex;gap:5px;align-items:center;padding:13px 18px}
+.cbubble.typing span{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:tdot .8s infinite}
+.cbubble.typing span:nth-child(2){animation-delay:.16s}
+.cbubble.typing span:nth-child(3){animation-delay:.32s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+.cmeta{font-size:10px;color:var(--text3);margin-top:3px}
+.caction{margin-top:7px;padding:5px 10px;background:rgba(82,217,138,.12);border:1px solid rgba(82,217,138,.2);border-radius:8px;font-size:12px;color:var(--green)}
+.chat-input-bar{padding:12px 24px 16px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.qchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.qchip{padding:5px 11px;background:var(--card);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.qchip:hover{border-color:var(--accent);color:var(--accent)}
+.chat-row{display:flex;gap:10px;align-items:flex-end}
+.ctextarea{flex:1;min-height:42px;max-height:120px;resize:none;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .2s;line-height:1.5}
+.ctextarea:focus{border-color:var(--accent)}
+.chat-send{width:44px;height:44px;border-radius:12px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.chat-send:hover:not(:disabled){background:#6055e0;transform:translateY(-1px)}
+.chat-send:disabled{opacity:.4;cursor:not-allowed}
+.chat-author{font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:3px;margin-left:4px}
+
+/* FAB */
+.fab{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.4);z-index:999;transition:all .2s}
+.fab:hover{transform:scale(1.08)}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:900px){.left-panel{display:none}.stats-grid{grid-template-columns:repeat(2,1fr)}.charts-grid{grid-template-columns:1fr}}
+
+/* Responsive layout: keep every section reachable on tablets and phones. */
+.main-area,.right-panel,.chat-msgs{min-width:0;min-height:0}
+.mobile-toolbar{display:none}
+.chart-wrap canvas{max-width:100%}
+button,[role=button],.nav-icon-btn,.left-nav-item,.subj-btn{touch-action:manipulation}
+:focus-visible{outline:2px solid var(--accent2);outline-offset:3px}
+@media(max-width:900px){
+  .app{height:100vh;height:100dvh}
+  .main-area{position:relative;flex-direction:column}
+  .mobile-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+  .mobile-toolbar span{font-size:13px;color:var(--text2)}
+  .main-area>.left-panel{display:none;width:100%;max-height:45%;overflow-y:auto;flex-shrink:0;border-right:0;border-bottom:1px solid var(--border);padding-bottom:10px}
+  .main-area.mobile-panel-open>.left-panel{display:flex}
+  .left-panel-header{padding-top:12px}
+  .left-nav-item,.subj-btn{min-height:44px}
+  .right-panel{flex:1}
+  .page{padding:24px}
+  .settings-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;flex-direction:row;align-items:center;gap:4px;padding:6px 8px;padding-top:max(6px,env(safe-area-inset-top));border-right:0;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;scrollbar-width:thin}
+  .sidebar-logo,.sidebar-spacer{display:none}
+  .nav-icon-btn{flex:0 0 64px;width:64px;height:52px;margin:0;flex-direction:column;gap:3px;font-size:18px}
+  .nav-tooltip{position:static;opacity:1;display:block;border:0;background:none;padding:0;font-size:9px;line-height:1.2;max-width:64px;white-space:normal;text-align:center;color:var(--text2)}
+  .nav-icon-btn.active::before{left:12px;right:12px;top:auto;bottom:0;transform:none;width:auto;height:3px;border-radius:3px}
+  .sidebar>.sidebar-avatar{flex:0 0 44px;height:44px;margin:0 4px}
+  .main-area{padding-bottom:env(safe-area-inset-bottom)}
+  .mobile-toolbar{padding:8px 12px}
+  .page{padding:20px 14px 92px}
+  .page-title{font-size:18px;overflow-wrap:anywhere}
+  .page>div[style*="justify-content:space-between"]{gap:10px;flex-wrap:wrap}
+  input:not([type=color]):not([type=checkbox]):not([type=file]),select,textarea{font-size:16px;min-width:0}
+  .btn{min-height:44px;white-space:normal}
+  .auth-screen,.setup-screen{height:100vh;height:100dvh;min-height:0;overflow-y:auto;padding:20px 14px;padding-top:max(20px,env(safe-area-inset-top));padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  .auth-card,.setup-card{width:100%;max-width:440px;padding:26px 20px;border-radius:20px;margin:auto;flex-shrink:0;max-height:none;overflow:visible}
+  .auth-logo{font-size:20px;overflow-wrap:anywhere}
+  .auth-tagline{margin-bottom:24px}
+  .profile-grid{gap:8px}.profile-opt{padding:12px 8px}
+  .subj-grid{grid-template-columns:1fr;max-height:40dvh}
+  .task-item{gap:8px;padding:12px 4px;flex-wrap:wrap}
+  .task-info{flex:1 1 160px}
+  .task-title{white-space:normal;overflow-wrap:anywhere;line-height:1.45}
+  .task-actions{opacity:1;margin-left:auto}
+  .icon-btn{width:36px;height:36px}
+  .task-check{width:24px;height:24px}
+  .tag{overflow-wrap:anywhere;max-width:100%}
+  .week-strip{gap:4px}.week-day{min-width:0;padding:10px 2px;border-radius:8px}
+  .week-day-num{font-size:14px}.week-day-count{font-size:9px}
+  .today-section-hdr{gap:8px;flex-wrap:wrap}
+  .cal-header{flex-wrap:wrap;gap:12px}.cal-nav{min-width:0;width:100%;gap:6px}
+  .cal-nav-label{min-width:0;padding:0 6px;font-size:13px}
+  .cal-grid,.cal-grid-header{gap:3px;grid-template-columns:repeat(7,minmax(0,1fr))}
+  .cal-cell{min-width:0;min-height:86px;padding:4px 2px;border-radius:7px}
+  .cal-num{font-size:12px;width:22px;height:22px}
+  .cal-chip{font-size:9px;padding:2px}.cal-more{font-size:9px}
+  .stats-grid{gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat-card{padding:14px 12px}.stat-val{font-size:22px}
+  .charts-grid,.settings-grid{grid-template-columns:minmax(0,1fr)}
+  .chart-card,.sett-card{padding:16px;min-width:0;overflow-wrap:anywhere}
+  .chart-hdr{gap:8px;flex-wrap:wrap}.chart-wrap{height:220px}
+  .toggle-row{gap:12px}.toggle{flex-shrink:0}
+  .search-bar{padding:8px 10px;gap:6px}.search-bar input{min-width:0;padding:8px 0}
+  .modal-overlay{padding:10px;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+  .modal{padding:20px 16px;border-radius:16px;max-height:calc(100vh - 20px);max-height:calc(100dvh - 20px)}
+  .modal-title{font-size:15px;overflow-wrap:anywhere}.modal-header{gap:10px;margin-bottom:16px}
+  .modal-close{min-width:40px;min-height:40px;flex-shrink:0}
+  .modal-footer{gap:8px}.modal-footer .btn{flex:1;padding:12px!important}
+  .modal div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;gap:0!important}
+  .ai-parse-block{padding:12px}.ai-parse-row{flex-direction:column;align-items:stretch}.btn-ai{width:100%;height:44px}
+  .day-pick{gap:3px;grid-template-columns:repeat(7,minmax(0,1fr))}.dp-btn{min-width:0;padding:8px 1px}.dp-date{font-size:13px}
+  .chat-hdr{padding:12px 14px;font-size:14px;gap:8px;flex-wrap:wrap}
+  .chat-msgs{padding:14px 12px}.cmrow{max-width:90%}
+  .chat-input-bar{padding:10px 12px}.chat-row{gap:8px}.ctextarea{min-width:0}
+  .qchips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.qchip{flex-shrink:0;min-height:36px;display:flex;align-items:center}
+  .fab{right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:52px;height:52px}
+  .toast{left:12px;right:12px;bottom:calc(80px + env(safe-area-inset-bottom));overflow-wrap:anywhere}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- AUTH -->
+<div v-if="!token" class="auth-screen">
+  <div style="position:absolute;inset:0;pointer-events:none"><div class="abc"></div><div class="abc"></div><div class="abc"></div></div>
+  <div class="auth-card">
+    <div class="auth-logo">StudyBalance</div>
+    <div class="auth-tagline">Управляй учёбой, а не стрессом</div>
+    <div class="auth-tabs">
+      <div class="auth-tab" :class="{active:authTab==='login'}" @click="authTab='login';authError=''">Войти</div>
+      <div class="auth-tab" :class="{active:authTab==='register'}" @click="authTab='register';authError=''">Регистрация</div>
+    </div>
+    <div v-if="authTab==='login'">
+      <div class="form-group"><label>Имя пользователя</label><input v-model="lf.username" placeholder="username" @keyup.enter="doLogin" :class="{err:le.username}"><div v-if="le.username" class="field-error">{{le.username}}</div></div>
+      <div class="form-group"><label>Пароль</label><input type="password" v-model="lf.password" placeholder="••••••••" @keyup.enter="doLogin" :class="{err:le.password}"><div v-if="le.password" class="field-error">{{le.password}}</div></div>
+      <button class="btn btn-primary" @click="doLogin" :disabled="authLoading"><span v-if="authLoading" class="spinner" style="width:14px;height:14px;margin:0 8px 0 0"></span>{{authLoading?'Вход...':'Войти'}}</button>
+    </div>
+    <div v-else>
+      <div class="form-group"><label>Имя пользователя</label><input v-model="rf.username" placeholder="username" :class="{err:re.username}"><div v-if="re.username" class="field-error">{{re.username}}</div></div>
+      <div class="form-group"><label>Email</label><input v-model="rf.email" placeholder="you@school.ru" :class="{err:re.email}"><div v-if="re.email" class="field-error">{{re.email}}</div></div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <div style="position:relative">
+          <input :type="showPw?'text':'password'" v-model="rf.password" placeholder="от 6 до 30 символов" :class="{err:re.password}" style="padding-right:42px">
+          <span @click="showPw=!showPw" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:16px;color:var(--text2);user-select:none">{{showPw?'🙈':'👁'}}</span>
+        </div>
+        <div class="pw-bar" :style="{width:pwPct+'%',background:pwColor,maxWidth:'100%'}"></div>
+        <div v-if="re.password" class="field-error">{{re.password}}</div>
+        <div v-else-if="rf.password" class="field-hint">Надёжность: {{pwLabel}}</div>
+      </div>
+      <button class="btn btn-primary" @click="doRegister" :disabled="authLoading"><span v-if="authLoading" class="spinner" style="width:14px;height:14px;margin:0 8px 0 0"></span>{{authLoading?'Создание...':'Создать аккаунт'}}</button>
+    </div>
+    <div v-if="authError" class="error-msg">{{authError}}</div>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div v-else-if="setupStep>0" class="setup-screen">
+  <div style="position:absolute;inset:0;pointer-events:none"><div class="abc"></div><div class="abc"></div></div>
+  <div class="setup-card">
+    <div style="margin-bottom:28px"><div v-for="i in 2" :key="i" class="step-dot" :class="{active:setupStep===i,done:setupStep>i}"></div></div>
+    <div v-if="setupStep===1">
+      <div class="auth-logo" style="margin-bottom:6px">Выбери профиль</div>
+      <div style="color:var(--text2);font-size:14px;margin-bottom:24px">Мы подберём предметы для тебя</div>
+      <div class="profile-grid">
+        <div v-for="p in profiles" :key="p.id" class="profile-opt" :class="{selected:selProfile===p.id}" @click="selProfile=p.id">
+          <div style="font-size:28px;margin-bottom:8px">{{p.icon}}</div>
+          <div style="font-size:14px;font-weight:700;margin-bottom:4px">{{p.title}}</div>
+          <div style="font-size:12px;color:var(--text2)">{{p.sub}}</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" @click="goSubjects" :disabled="!selProfile">Далее →</button>
+      <div style="text-align:center;margin-top:14px"><span style="font-size:13px;color:var(--text3);cursor:pointer" @click="setupStep=0">Пропустить</span></div>
+    </div>
+    <div v-if="setupStep===2">
+      <div class="auth-logo" style="margin-bottom:6px">Отметь предметы</div>
+      <div style="color:var(--text2);font-size:14px;margin-bottom:20px">Выбери те, которые ты изучаешь</div>
+      <div class="subj-grid">
+        <div v-for="s in setupSubjs" :key="s.name" class="subj-item" :class="{selected:s.sel}" @click="s.sel=!s.sel">
+          <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0" :style="{background:s.color}"></div>
+          <span style="font-size:13px;font-weight:500">{{s.name}}</span>
+          <span v-if="s.sel" style="margin-left:auto;color:var(--accent)">✓</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-ghost" style="width:auto;padding:13px 20px" @click="setupStep=1">← Назад</button>
+        <button class="btn btn-primary" @click="finishSetup" :disabled="setupLoading"><span v-if="setupLoading" class="spinner" style="width:14px;height:14px;margin:0 8px 0 0"></span>{{setupLoading?'Сохранение...':'Начать →'}}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div v-else class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">SB</div>
+    <div class="nav-icon-btn" :class="{active:page==='tasks'}" role="button" tabindex="0" @keydown.enter="page='tasks'" @keydown.space.prevent="page='tasks'" @click="page='tasks'" title="Задачи" aria-label="Задачи">
+      <span>☰</span><span class="nav-tooltip">Задачи</span>
+    </div>
+    <div class="nav-icon-btn" :class="{active:page==='calendar'}" role="button" tabindex="0" @keydown.enter="page='calendar'" @keydown.space.prevent="page='calendar'" @click="page='calendar'" title="Календарь" aria-label="Календарь">
+      <span>📅</span><span class="nav-tooltip">Календарь</span>
+    </div>
+    <div class="nav-icon-btn" :class="{active:page==='today'}" role="button" tabindex="0" @keydown.enter="page='today'" @keydown.space.prevent="page='today'" @click="page='today'" title="Сегодня" aria-label="Сегодня">
+      <span>◆</span><span class="nav-tooltip"@click="goToday()">Сегодня</span>
+    </div>
+    <div class="nav-icon-btn" :class="{active:page==='search'}" role="button" tabindex="0" @keydown.enter="page='search'" @keydown.space.prevent="page='search'" @click="page='search'" title="Поиск" aria-label="Поиск">
+      <span>🔍</span><span class="nav-tooltip">Поиск</span>
+    </div>
+    <div class="nav-icon-btn" :class="{active:page==='stats'}" role="button" tabindex="0" @keydown.enter="page='stats';loadStats()" @keydown.space.prevent="page='stats';loadStats()" @click="page='stats';loadStats()" title="Статистика" aria-label="Статистика">
+      <span>📊</span><span class="nav-tooltip">Статистика</span>
+    </div>
+    <div class="nav-icon-btn" :class="{active:page==='aichat'}" role="button" tabindex="0" @keydown.enter="page='aichat'" @keydown.space.prevent="page='aichat'" @click="page='aichat'" title="AI Ассистент" aria-label="AI Ассистент">
+      <span>🤖</span><span class="nav-tooltip">AI Ассистент</span>
+    </div>
+    <div class="nav-icon-btn" :class="{active:page==='userchat'}" role="button" tabindex="0" @keydown.enter="page='userchat'" @keydown.space.prevent="page='userchat'" @click="page='userchat'" title="Чат" aria-label="Чат">
+      <span>💬</span><span class="nav-tooltip">Чат</span>
+    </div>
+    <div class="nav-icon-btn" :class="{active:page==='help'}" role="button" tabindex="0" @keydown.enter="page='help'" @keydown.space.prevent="page='help'" @click="page='help'" title="Помощь" aria-label="Помощь">
+      <span>❓</span><span class="nav-tooltip">Помощь</span>
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-avatar" role="button" tabindex="0" aria-label="Настройки" @keydown.enter="page='settings'" @keydown.space.prevent="page='settings'" @click="page='settings'" :title="user?.username">
+      {{user?.username?.[0]?.toUpperCase()||'?'}}
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <div class="main-area" :class="{'mobile-panel-open':mobilePanelOpen}">
+    <div v-if="['tasks','stats','settings','aichat','userchat','help'].includes(page)" class="mobile-toolbar">
+      <span>StudyBalance</span>
+      <button class="btn btn-ghost btn-sm" :aria-expanded="mobilePanelOpen" @click="mobilePanelOpen=!mobilePanelOpen">{{mobilePanelOpen?'✕ Закрыть меню':'☰ Меню раздела'}}</button>
+    </div>
+
+    <!-- LEFT PANEL: Tasks -->
+    <div v-if="page==='tasks'" class="left-panel">
+      <div class="left-panel-header">Задачи</div>
+      <div class="left-nav-item" :class="{active:taskView==='today'}" @click="taskView='today'">
+        <span class="left-nav-icon">📅</span> Сегодня
+        <span class="left-nav-badge" v-if="activeToday.length">{{activeToday.length}}</span>
+      </div>
+      <div class="left-nav-item" :class="{active:taskView==='week'}" @click="taskView='week'">
+        <span class="left-nav-icon">📆</span> Следующие 7 дней
+        <span class="left-nav-badge" v-if="weekTasks.filter(t=>!t.is_completed).length">{{weekTasks.filter(t=>!t.is_completed).length}}</span>
+      </div>
+      <div class="left-nav-item" :class="{active:taskView==='overdue'}" @click="taskView='overdue'">
+        <span class="left-nav-icon">⚠️</span> Просроченные
+        <span class="left-nav-badge red" v-if="overdueTasks.length">{{overdueTasks.length}}</span>
+      </div>
+      <div class="left-nav-item" :class="{active:taskView==='archive'}" @click="taskView='archive'">
+        <span class="left-nav-icon">🗄</span> Архив
+        <span class="left-nav-badge" v-if="archive.length">{{archive.length}}</span>
+      </div>
+      <div class="left-section-title">Предметы</div>
+      <div class="subj-btn" :class="{active:taskView==='all'}" @click="taskView='all';filterSubj=null">
+        <div class="subj-dot" style="background:var(--text3)"></div>
+        Все предметы
+      </div>
+      <div v-for="s in subjects" :key="s.id" class="subj-btn" :class="{active:filterSubj===s.id}" @click="taskView='all';filterSubj=s.id">
+        <div class="subj-dot" :style="{background:s.color}"></div>
+        {{s.name}}
+      </div>
+      <div style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--border)">
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;gap:8px" @click="openSubjModal=true">+ Предмет</button>
+      </div>
+    </div>
+
+    <!-- LEFT PANEL: Stats -->
+    <div v-if="page==='stats'" class="left-panel">
+      <div class="left-panel-header">Статистика</div>
+      <div class="left-nav-item active"><span class="left-nav-icon">📊</span> Обзор</div>
+    </div>
+
+    <!-- LEFT PANEL: Settings -->
+    <div v-if="page==='settings'" class="left-panel">
+      <div class="left-panel-header">Настройки</div>
+      <div class="left-nav-item" :class="{active:settTab==='profile'}" @click="settTab='profile'"><span class="left-nav-icon">👤</span> Профиль</div>
+      <div class="left-nav-item" :class="{active:settTab==='notify'}" @click="settTab='notify'"><span class="left-nav-icon">🔔</span> Уведомления</div>
+      <div class="left-nav-item" :class="{active:settTab==='subjects'}" @click="settTab='subjects'"><span class="left-nav-icon">📚</span> Предметы</div>
+      <div class="left-nav-item" :class="{active:settTab==='backup'}" @click="settTab='backup'"><span class="left-nav-icon">💾</span> Резервная копия</div>
+    </div>
+
+    <!-- LEFT PANEL: AI Chat -->
+    <div v-if="page==='aichat'" class="left-panel">
+      <div class="left-panel-header">AI Ассистент</div>
+      <div class="left-section-title">Быстрые вопросы</div>
+      <div v-for="s in aiSuggestions" :key="s" class="left-nav-item" style="font-size:12px;line-height:1.4;height:auto;padding:10px 14px" @click="sendAI(s)">
+        <span class="left-nav-icon">💬</span>{{s}}
+      </div>
+      <div style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--border)">
+        <button class="btn btn-ghost btn-sm" style="width:100%;font-size:12px" @click="clearAIChat">🗑 Очистить историю</button>
+      </div>
+    </div>
+
+    <!-- LEFT PANEL: Help -->
+    <div v-if="page==='help'" class="left-panel">
+      <div class="left-panel-header">Помощь</div>
+      <div v-for="h in helpTopics" :key="h.id" class="left-nav-item" :class="{active:helpTab===h.id}" @click="helpGo(h.id)">
+        <span class="left-nav-icon">{{h.icon}}</span> {{h.title}}
+      </div>
+    </div>
+
+    <!-- LEFT PANEL: User Chat -->
+    <div v-if="page==='userchat'" class="left-panel">
+      <div class="left-panel-header">Чат</div>
+      <div class="left-nav-item active"><span class="left-nav-icon">💬</span> Общая беседа</div>
+      <div style="padding:12px 16px;margin-top:8px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Сейчас в чате</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0">
+          <div class="sidebar-avatar" style="width:28px;height:28px;font-size:11px;cursor:default">{{user?.username?.[0]?.toUpperCase()||'?'}}</div>
+          <span style="font-size:13px;font-weight:500">{{user?.username}}</span>
+          <span style="margin-left:auto;width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel" :class="{'chat-mode':page==='aichat'||page==='userchat'}">
+
+      <!-- TASKS PAGE -->
+      <div v-if="page==='tasks'" class="page">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div class="page-title" style="margin:0">
+            {{taskView==='today'?'Сегодня':taskView==='week'?'Следующие 7 дней':taskView==='archive'?'Архив':filterSubj?subjects.find(s=>s.id===filterSubj)?.name:'Все задачи'}}
+          </div>
+                  </div>
+
+        <div v-if="loading" class="loading"><div class="spinner"></div>Загрузка...</div>
+        <div v-else>
+          <div v-if="currentTasks.length===0" class="empty">
+            <div class="empty-icon">{{taskView==='archive'?'🗄':'✨'}}</div>
+            <div class="empty-title">{{taskView==='archive'?'Архив пуст':'Задач нет'}}</div>
+            <div style="font-size:13px">{{taskView==='archive'?'Выполненные задачи появятся здесь':'Отличное время добавить первую задачу'}}</div>
+          </div>
+          <div v-else>
+            <div v-for="t in currentTasks" :key="t.id" class="task-item" :class="{done:t.is_completed}">
+              <div class="task-check" :class="{checked:t.is_completed}" @click.stop="toggleTask(t)">
+                <span v-if="t.is_completed" class="ck">✓</span>
+              </div>
+              <div class="task-info">
+                <div class="task-title">{{t.title}}</div>
+                <div class="task-tags">
+                  <div class="priority-dot" :style="{background:priColor(t.priority)}" :title="priLabel(t.priority)"></div>
+                  <span class="tag" :style="t.subject?`background:${t.subject.color}18;color:${t.subject.color}`:''">{{t.subject?t.subject.name:'Без предмета'}}</span>
+                  <span class="tag" :class="typeClass(t.task_type)">{{TL[t.task_type]}}</span>
+                  <span class="tag" :class="diffClass(t.difficulty)">{{DL[t.difficulty]}}</span>
+                  <span class="hbadge">{{t.estimated_hours}}ч</span>
+                </div>
+              </div>
+              <span class="dl" :class="dlClass(t)">{{fmtDL(t.deadline)}}</span>
+              <div class="task-actions">
+                <button class="icon-btn" @click.stop="openXfer(t)" title="Перенести">📆</button>
+                <button class="icon-btn" @click.stop="openTM(t)">✏️</button>
+                <button class="icon-btn" @click.stop="delTask(t.id)" style="color:var(--danger)">🗑</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TODAY PAGE -->
+      <div v-if="page==='today'" class="page">
+        <div class="page-title">{{todayWd}}, {{todayNum}} {{todayMon}}</div>
+        <!-- Week strip -->
+        <div class="week-strip" v-if="wStats">
+          <div v-for="d in wStats.days" :key="d.date" class="week-day" :class="{today:isToday(d.date),overloaded:d.is_overloaded}">
+            <div class="week-day-name">{{d.day_name}}</div>
+            <div class="week-day-num">{{new Date(d.date+'T00:00:00').getDate()}}</div>
+            <div class="week-day-bar"><div class="week-day-fill" :class="lc(d.total_hours)" :style="{width:Math.min(100,d.total_hours/6*100)+'%'}"></div></div>
+            <div class="week-day-count">{{d.task_count}} задач</div>
+          </div>
+        </div>
+        <!-- Today tasks -->
+        <div class="today-section">
+          <div class="today-section-hdr">
+            <span>Активные ({{activeToday.length}})</span>
+            <span class="load-info" :class="+todayH>4?'load-warn-badge':'load-ok-badge'">{{todayH}}ч {{+todayH>4?'⚠️ Перегруз':''}}</span>
+          </div>
+          <div v-if="!activeToday.length" class="empty" style="padding:30px 0"><div class="empty-icon" style="font-size:32px">🎉</div><div style="font-size:14px;color:var(--text2)">Задач на сегодня нет!</div></div>
+          <div v-for="t in activeToday" :key="t.id" class="task-item">
+            <div class="task-check" @click.stop="toggleTask(t)"><span class="ck"></span></div>
+            <div class="task-info">
+              <div class="task-title">{{t.title}}</div>
+              <div class="task-tags">
+                <div class="priority-dot" :style="{background:priColor(t.priority)}"></div>
+                <span class="tag" :style="t.subject?`background:${t.subject.color}18;color:${t.subject.color}`:''">{{t.subject?t.subject.name:'Без предмета'}}</span>
+                <span class="tag" :class="typeClass(t.task_type)">{{TL[t.task_type]}}</span>
+                <span class="hbadge">{{t.estimated_hours}}ч</span>
+              </div>
+            </div>
+            <div class="task-actions">
+              <button class="icon-btn" @click.stop="openXfer(t)">📆</button>
+              <button class="icon-btn" @click.stop="openTM(t)">✏️</button>
+              <button class="icon-btn" @click.stop="delTask(t.id)" style="color:var(--danger)">🗑</button>
+            </div>
+          </div>
+        </div>
+        <div v-if="doneToday.length" class="today-section">
+          <div class="today-section-hdr" style="cursor:pointer" @click="showDone=!showDone">
+            <span>Выполнено ({{doneToday.length}})</span><span style="font-size:12px">{{showDone?'▲':'▼'}}</span>
+          </div>
+          <div v-if="showDone" v-for="t in doneToday" :key="t.id" class="task-item done">
+            <div class="task-check checked" @click.stop="toggleTask(t)"><span class="ck">✓</span></div>
+            <div class="task-info"><div class="task-title">{{t.title}}</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALENDAR PAGE -->
+      <div v-if="page==='calendar'" class="page">
+        <div class="cal-header">
+          <div class="cal-title">{{calMonthName}} {{calYear}}</div>
+          <div class="cal-nav">
+            <div class="cal-nav-btn" @click="calPrev">‹</div>
+            <div class="cal-nav-label">{{calMonthName}} {{calYear}}</div>
+            <div class="cal-nav-btn" @click="calNext">›</div>
+          </div>
+        </div>
+        <div class="cal-grid-header">
+          <div v-for="d in ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']" :key="d" class="cal-day-name">{{d}}</div>
+        </div>
+        <div class="cal-grid">
+          <div v-for="cell in calCells" :key="cell.key" class="cal-cell"
+            :class="{today:cell.isToday,'other-month':!cell.currentMonth,'has-tasks':cell.tasks.length>0}"
+            @click="calCellClick(cell)">
+            <div class="cal-num">{{cell.day}}</div>
+            <div v-for="t in cell.tasks.slice(0,3)" :key="t.id" class="cal-chip"
+              :style="t.subject?`background:${t.subject.color}20;color:${t.subject.color}`:'background:rgba(124,106,247,.15);color:var(--accent)'">
+              {{t.title}}
+            </div>
+            <div v-if="cell.tasks.length>3" class="cal-more">+{{cell.tasks.length-3}} ещё</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH PAGE -->
+      <div v-if="page==='search'" class="page">
+        <div class="page-title">Поиск</div>
+        <div class="search-bar">
+          <span style="font-size:18px;color:var(--text3)">🔍</span>
+          <input v-model="srch" placeholder="Введи название задачи..." @input="doSearch" autofocus>
+        </div>
+        <div v-if="!srch" class="empty"><div class="empty-icon">🔍</div><div class="empty-title">Начни вводить для поиска</div></div>
+        <div v-else-if="!searchResults.length" class="empty"><div class="empty-icon">😕</div><div class="empty-title">Ничего не найдено</div></div>
+        <div v-else class="task-list">
+          <div v-for="t in searchResults" :key="t.id" class="task-item" :class="{done:t.is_completed}">
+            <div class="task-check" :class="{checked:t.is_completed}" @click.stop="toggleTask(t)">
+              <span v-if="t.is_completed" class="ck">✓</span>
+            </div>
+            <div class="task-info">
+              <div class="task-title">{{t.title}}</div>
+              <div class="task-tags">
+                <span class="tag" :style="t.subject?`background:${t.subject.color}18;color:${t.subject.color}`:''">{{t.subject?t.subject.name:'Без предмета'}}</span>
+                <span class="tag" :class="typeClass(t.task_type)">{{TL[t.task_type]}}</span>
+                <span class="dl" :class="dlClass(t)">{{fmtDL(t.deadline)}}</span>
+              </div>
+            </div>
+            <div class="task-actions">
+              <button class="icon-btn" @click.stop="openTM(t)">✏️</button>
+              <button class="icon-btn" @click.stop="delTask(t.id)" style="color:var(--danger)">🗑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS PAGE -->
+      <div v-if="page==='stats'" class="page">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div class="page-title" style="margin:0">Статистика</div>
+          <button class="btn btn-ghost btn-sm" @click="exportCSV">⬇ CSV</button>
+        </div>
+        <div v-if="wStats" class="stats-grid">
+          <div class="stat-card ca"><div class="stat-val">{{wStats.total_tasks}}</div><div class="stat-lbl">Всего задач</div></div>
+          <div class="stat-card cg"><div class="stat-val" style="color:var(--green)">{{wStats.completed_tasks}}</div><div class="stat-lbl">Выполнено</div></div>
+          <div class="stat-card ct"><div class="stat-val" style="color:var(--accent2)">{{wStats.total_tasks-wStats.completed_tasks}}</div><div class="stat-lbl">Активных</div></div>
+          <div class="stat-card cd"><div class="stat-val" style="color:var(--danger)">{{overdueTasks.length}}</div><div class="stat-lbl">Просроченных</div></div>
+        </div>
+
+        <!-- Просроченные -->
+        <div v-if="overdueTasks.length" class="overdue-section">
+          <div class="overdue-title">⚠️ Просроченные задачи ({{overdueTasks.length}})</div>
+          <div v-for="t in overdueTasks.slice(0,5)" :key="t.id" class="task-item overdue-item" style="background:rgba(255,91,121,.04)">
+            <div class="task-check" @click.stop="toggleTask(t)"><span class="ck"></span></div>
+            <div class="task-info">
+              <div class="task-title">{{t.title}}</div>
+              <div class="task-tags">
+                <span class="tag" :style="t.subject?`background:${t.subject.color}18;color:${t.subject.color}`:''">{{t.subject?t.subject.name:'Без предмета'}}</span>
+                <span class="dl overdue">просрочено {{overdueAgo(t)}} дн.</span>
+              </div>
+            </div>
+            <button class="icon-btn" @click.stop="openXfer(t)" title="Перенести">📆</button>
+          </div>
+        </div>
+
+        <!-- Рекомендации -->
+        <div class="reco-card" v-if="recommendations.length">
+          <div class="reco-title">💡 Рекомендации</div>
+          <div v-for="r in recommendations" :key="r.text" class="reco-item">
+            <span class="reco-icon">{{r.icon}}</span><span>{{r.text}}</span>
+          </div>
+        </div>
+
+        <!-- AI Советник -->
+        <div class="reco-card" style="border-color:rgba(124,106,247,.3);background:linear-gradient(135deg,rgba(124,106,247,.05),rgba(92,224,216,.03))">
+          <div class="reco-title" style="display:flex;align-items:center;justify-content:space-between">
+            <span>🤖 AI Советник</span>
+            <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:4px 12px" @click="loadAIHints" :disabled="hintsLoading">
+              <span v-if="hintsLoading">⏳ Думаю…</span><span v-else>↻ Обновить</span>
+            </button>
+          </div>
+          <div v-if="hintsLoading&&!aiHints.length" class="reco-item" style="color:var(--text3)">
+            <span class="reco-icon">⏳</span><span>Анализирую нагрузку…</span>
+          </div>
+          <div v-else-if="!aiHints.length" class="reco-item" style="color:var(--text3)">
+            <span class="reco-icon">🤖</span><span>Нажми «Обновить» для персональных советов</span>
+          </div>
+          <div v-for="h in aiHints" :key="h" class="reco-item">
+            <span class="reco-icon">✦</span><span>{{h}}</span>
+          </div>
+        </div>
+        <div class="charts-grid">
+          <div class="chart-card"><div class="chart-hdr"><div class="chart-lbl">Нагрузка по дням (ч)</div><span class="chart-dl" @click="dlChart('wc','load')">💾</span></div><div class="chart-insight" v-if="wStats">{{weekInsight}}</div><div class="chart-wrap"><canvas ref="wc"></canvas></div></div>
+          <div class="chart-card"><div class="chart-hdr"><div class="chart-lbl">Задачи по предметам</div><span class="chart-dl" @click="dlChart('sc','subjects')">💾</span></div><div class="chart-insight" v-if="subjStats.length">{{subjectInsight}}</div><div class="chart-wrap"><canvas ref="sc"></canvas></div></div>
+          <div class="chart-card"><div class="chart-hdr"><div class="chart-lbl">Выполнение задач</div><span class="chart-dl" @click="dlChart('dc','done')">💾</span></div><div class="chart-insight" v-if="wStats">{{completionInsight}}</div><div class="chart-wrap"><canvas ref="dc"></canvas></div></div>
+          <div class="chart-card"><div class="chart-hdr"><div class="chart-lbl">Часы по предметам</div><span class="chart-dl" @click="dlChart('hc','hours')">💾</span></div><div class="chart-insight" v-if="subjStats.length">{{hoursInsight}}</div><div class="chart-wrap"><canvas ref="hc"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS PAGE -->
+      <div v-if="page==='settings'" class="page">
+        <div class="page-title">Настройки</div>
+        <!-- Profile tab -->
+        <div v-if="settTab==='profile'" class="settings-grid">
+          <div class="sett-card">
+            <div class="sett-title">👤 Профиль</div>
+            <div class="form-group"><label>Имя пользователя</label><input :value="user?.username" disabled style="opacity:.5"></div>
+            <div class="form-group"><label>Email</label><input :value="user?.email" disabled style="opacity:.5"></div>
+            <div class="form-group"><label>Учебный профиль</label><select v-model="cfg.profile"><option v-for="p in profiles" :key="p.id" :value="p.id">{{p.title}}</option></select></div>
+            <div class="form-group"><label>Порог перегруза (ч/день)</label><input type="number" v-model.number="cfg.threshold" min="2" max="10" step="0.5"><div class="field-hint">Дни с нагрузкой > {{cfg.threshold}} ч подсвечиваются</div></div>
+            <button class="btn btn-primary btn-sm" style="width:auto;padding:10px 20px" @click="saveCfg">Сохранить</button>
+          </div>
+          <div class="sett-card">
+            <div class="sett-title">⚠️ Опасная зона</div>
+            <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Эти действия необратимы.</p>
+            <button class="btn btn-danger" style="width:100%;margin-bottom:10px" @click="clearArchive">Очистить архив</button>
+            <button class="btn btn-ghost btn-sm" style="width:100%;color:var(--danger)" @click="logout">Выйти из аккаунта</button>
+          </div>
+        </div>
+        <!-- Notify tab -->
+        <div v-if="settTab==='notify'" class="sett-card" style="max-width:500px">
+          <div class="sett-title">🔔 Уведомления</div>
+          <div class="toggle-row">
+            <div><div class="tgl-lbl">Push-уведомления в браузере</div><div style="font-size:12px;color:var(--text2)">Приходят на телефон/компьютер, даже когда сайт закрыт</div></div>
+            <label class="toggle"><input type="checkbox" :checked="pushSubscribed" :disabled="pushBusy||!pushSupported" @change="togglePush"><div class="tgl-track"><div class="tgl-thumb"></div></div></label>
+          </div>
+          <div v-if="!pushSupported" style="font-size:12px;color:var(--danger);margin:-8px 0 12px">Этот браузер не поддерживает push-уведомления</div>
+          <button v-if="pushSubscribed" class="btn btn-ghost btn-sm" style="width:auto;padding:8px 16px;margin-bottom:16px" @click="testPush">Отправить тестовое уведомление</button>
+          <div class="toggle-row"><div><div class="tgl-lbl">За день до дедлайна</div></div><label class="toggle"><input type="checkbox" v-model="cfg.notifyDay"><div class="tgl-track"><div class="tgl-thumb"></div></div></label></div>
+          <div class="toggle-row"><div><div class="tgl-lbl">Срочное (за 2 часа)</div></div><label class="toggle"><input type="checkbox" v-model="cfg.notifyUrgent"><div class="tgl-track"><div class="tgl-thumb"></div></div></label></div>
+          <div class="toggle-row"><div><div class="tgl-lbl">Предупреждение о перегрузе</div></div><label class="toggle"><input type="checkbox" v-model="cfg.notifyOverload"><div class="tgl-track"><div class="tgl-thumb"></div></div></label></div>
+          <div class="toggle-row"><div><div class="tgl-lbl">Утренняя сводка</div></div><label class="toggle"><input type="checkbox" v-model="cfg.notifyMorning"><div class="tgl-track"><div class="tgl-thumb"></div></div></label></div>
+          <div class="form-group" style="margin-top:16px"><label>Email</label><input v-model="cfg.email" placeholder="you@school.ru"></div>
+          <button class="btn btn-primary btn-sm" style="width:auto;padding:10px 20px" @click="saveCfg">Сохранить</button>
+        </div>
+        <!-- Subjects tab -->
+        <div v-if="settTab==='subjects'">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div style="font-size:15px;font-weight:600">Предметы ({{subjects.length}})</div>
+            <button class="btn btn-primary btn-sm" @click="openSubjModal=true">+ Предмет</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;max-width:500px">
+            <div v-for="s in subjects" :key="s.id" class="sett-card" style="padding:14px;display:flex;align-items:center;gap:12px">
+              <div style="width:36px;height:36px;border-radius:10px;flex-shrink:0" :style="{background:s.color}"></div>
+              <div style="flex:1;font-weight:600">{{s.name}}</div>
+              <button class="icon-btn" @click="openSM(s)">✏️</button>
+              <button class="icon-btn" @click="delSubj(s.id)" style="color:var(--danger)">🗑</button>
+            </div>
+          </div>
+        </div>
+        <!-- Backup tab -->
+        <div v-if="settTab==='backup'" class="sett-card" style="max-width:500px">
+          <div class="sett-title">💾 Резервное копирование</div>
+          <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--text2)">
+            <strong style="color:var(--text);display:block;margin-bottom:4px">Данные для экспорта</strong>
+            {{allTasks.length}} задач · {{subjects.length}} предметов
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button class="btn btn-ghost" style="justify-content:flex-start" @click="exportBk">⬇ Скачать резервную копию (JSON)</button>
+            <div style="position:relative"><button class="btn btn-ghost" style="justify-content:flex-start;width:100%">⬆ Восстановить из файла</button><input type="file" accept=".json" @change="importBk" style="position:absolute;inset:0;opacity:0;cursor:pointer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HELP PAGE -->
+      <div v-if="page==='help'" class="page">
+        <div class="page-title">Помощь</div>
+        <div class="help-wrap">
+          <div id="help-start" class="sett-card help-card">
+            <div class="sett-title">🚀 С чего начать</div>
+            <p>StudyBalance помогает распределять учебную нагрузку по дням, чтобы не было перегруза перед дедлайнами.</p>
+            <ol>
+              <li>Добавь свои предметы (или выбери их при первом входе).</li>
+              <li>Заноси задачи с дедлайном и примерным временем на выполнение.</li>
+              <li>Следи за нагрузкой на странице <b>◆ Сегодня</b> и в <b>📅 Календаре</b>.</li>
+              <li>Отмечай выполненное — задачи уходят в архив, а статистика обновляется.</li>
+            </ol>
+            <div class="help-tip">Меню слева: ☰ Задачи · 📅 Календарь · ◆ Сегодня · 🔍 Поиск · 📊 Статистика · 🤖 AI Ассистент · 💬 Чат · ❓ Помощь. Кружок с буквой внизу — настройки.</div>
+          </div>
+          <div id="help-tasks" class="sett-card help-card">
+            <div class="sett-title">📝 Задачи</div>
+            <div class="help-q">Как добавить задачу?</div>
+            <ol>
+              <li>Нажми круглую кнопку <b>+</b> в правом нижнем углу (есть на страницах Задачи, Сегодня, Календарь, Поиск).</li>
+              <li>Заполни <b>Название</b> и <b>Дедлайн</b> — это обязательные поля.</li>
+              <li>При желании укажи предмет, тип, сложность, приоритет и <b>Время (ч)</b> — сколько часов уйдёт на задачу.</li>
+              <li>Нажми <b>Создать</b>.</li>
+            </ol>
+            <p>Можно быстрее: в блоке <b>✨ Быстрый ввод с AI</b> напиши задачу обычным текстом, например «доклад по истории в пятницу, часа на 3», и нажми <b>Разобрать</b> — поля заполнятся сами. Кнопка <b>✨ Расписать</b> у описания предложит план выполнения.</p>
+            <div class="help-q">Как изменить, выполнить или удалить?</div>
+            <ul>
+              <li><b>Выполнить</b> — нажми на кружок слева от задачи. Повторное нажатие вернёт её в активные.</li>
+              <li><b>Изменить</b> — ✏️ справа от задачи.</li>
+              <li><b>Перенести</b> — 📆, затем выбери день. 🟢 — свободный день, ⚡ — уже перегружен.</li>
+              <li><b>Удалить</b> — 🗑.</li>
+            </ul>
+            <div class="help-tip">Слева на странице Задачи есть фильтры: Сегодня, Следующие 7 дней, Просроченные, Архив и отдельные предметы.</div>
+          </div>
+          <div id="help-load" class="sett-card help-card">
+            <div class="sett-title">⚖️ Нагрузка и перегруз</div>
+            <p>Нагрузка дня — это сумма часов всех задач с дедлайном в этот день.</p>
+            <div class="help-q">Как изменить максимум часов в день?</div>
+            <ol>
+              <li>Нажми на кружок с первой буквой своего имени внизу меню — откроются <b>Настройки</b>.</li>
+              <li>Во вкладке <b>👤 Профиль</b> найди поле <b>Порог перегруза (ч/день)</b>.</li>
+              <li>Укажи нужное значение (от 2 до 10 ч, шаг 0.5) и нажми <b>Сохранить</b>.</li>
+            </ol>
+            <p>Дни, где часов больше порога, считаются перегруженными: они подсвечиваются и по ним приходят предупреждения (если включены уведомления о перегрузе).</p>
+            <div class="help-q">День перегружен — что делать?</div>
+            <p>Перенеси часть задач через 📆 на свободные дни или спроси AI Ассистента: «Куда лучше поставить новую задачу?».</p>
+          </div>
+          <div id="help-subjects" class="sett-card help-card">
+            <div class="sett-title">📚 Предметы</div>
+            <ul>
+              <li><b>Добавить</b> — кнопка <b>+ Предмет</b> внизу панели Задачи или в Настройки → Предметы.</li>
+              <li><b>Изменить название или цвет</b> — Настройки → Предметы → ✏️.</li>
+              <li><b>Удалить</b> — Настройки → Предметы → 🗑.</li>
+            </ul>
+            <div class="help-tip">Цвет предмета используется в тегах задач и в календаре — так проще ориентироваться.</div>
+          </div>
+          <div id="help-calendar" class="sett-card help-card">
+            <div class="sett-title">📅 Календарь и «Сегодня»</div>
+            <ul>
+              <li>В календаре стрелками ‹ › листаются месяцы.</li>
+              <li>Клик по пустому дню — создать задачу, по дню с одной задачей — открыть её.</li>
+              <li>На странице <b>◆ Сегодня</b> — полоса недели с нагрузкой, задачи на сегодня и выполненные за день.</li>
+            </ul>
+          </div>
+          <div id="help-notify" class="sett-card help-card">
+            <div class="sett-title">🔔 Уведомления</div>
+            <ol>
+              <li>Открой Настройки → <b>🔔 Уведомления</b>.</li>
+              <li>Включи <b>Push-уведомления в браузере</b> и разреши их, когда браузер спросит.</li>
+              <li>Выбери, о чём напоминать: за день до дедлайна, за 2 часа, о перегрузе, утренняя сводка.</li>
+              <li>Нажми <b>Сохранить</b>. Проверить можно кнопкой «Отправить тестовое уведомление».</li>
+            </ol>
+            <div class="help-q">Уведомления не приходят?</div>
+            <ul>
+              <li>Проверь, что уведомления для сайта разрешены в настройках браузера.</li>
+              <li>Если написано, что браузер не поддерживает push, — открой сайт в Chrome, Edge или Firefox.</li>
+              <li>На iPhone сначала добавь сайт на экран «Домой».</li>
+            </ul>
+          </div>
+          <div id="help-ai" class="sett-card help-card">
+            <div class="sett-title">🤖 AI Ассистент и чат</div>
+            <p><b>AI Ассистент</b> знает твои задачи: можно попросить показать расписание, добавить или перенести задачу, подсказать, что делать сначала. Готовые вопросы есть слева. «🗑 Очистить историю» удаляет переписку с ассистентом.</p>
+            <p><b>💬 Чат</b> — общая беседа с другими пользователями, сообщения обновляются каждые несколько секунд.</p>
+          </div>
+          <div id="help-stats" class="sett-card help-card">
+            <div class="sett-title">📊 Статистика, поиск и резервная копия</div>
+            <ul>
+              <li><b>Статистика</b> — графики нагрузки, просроченные задачи и рекомендации. 💾 у графика сохраняет его картинкой, <b>⬇ CSV</b> — выгружает задачи в таблицу. «↻ Обновить» в AI Советнике даёт свежие советы.</li>
+              <li><b>Поиск</b> — начни вводить название задачи, результаты появятся сразу.</li>
+              <li><b>Резервная копия</b> — Настройки → 💾 Резервная копия → «Скачать резервную копию (JSON)».</li>
+            </ul>
+          </div>
+          <div id="help-faq" class="sett-card help-card">
+            <div class="sett-title">❔ Частые вопросы</div>
+            <div class="help-q">Задача стала просроченной.</div>
+            <p>Она в разделе Задачи → Просроченные и на странице Статистики. Выполни её или перенеси через 📆.</p>
+            <div class="help-q">Где выполненные задачи?</div>
+            <p>В Задачи → Архив. Очистить архив можно в Настройки → Профиль → «Очистить архив» (действие необратимо).</p>
+            <div class="help-q">Изменил настройки, но ничего не поменялось.</div>
+            <p>Не забудь нажать <b>Сохранить</b> внизу карточки настроек.</p>
+            <div class="help-q">Как выйти из аккаунта?</div>
+            <p>Настройки → Профиль → «Выйти из аккаунта».</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI CHAT PAGE -->
+      <div v-if="page==='aichat'" class="chat-page">
+        <div class="chat-hdr">
+          <span>🤖 AI Ассистент</span>
+          <span style="font-size:12px;font-weight:400;color:var(--text3)">на базе {{aiModel}}</span>
+        </div>
+        <div ref="aiChatBox" class="chat-msgs">
+          <div v-if="!aiMessages.length" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);text-align:center;padding:40px 20px">
+            <div style="font-size:52px;margin-bottom:16px">🤖</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text2);margin-bottom:8px">AI Ассистент готов помочь</div>
+            <div style="font-size:13px;max-width:300px">Спроси о расписании, попроси добавить или перенести задачу, получи рекомендацию</div>
+          </div>
+          <div v-for="(msg,idx) in aiMessages" :key="idx" class="cmrow" :class="msg.role==='user'?'mine':'theirs'">
+            <div class="cbubble" :class="msg.role==='user'?'mine':'theirs'">{{msg.content}}</div>
+            <div v-if="msg.action_result" class="caction">{{msg.action_result}}</div>
+          </div>
+          <div v-if="aiTyping" class="cmrow theirs">
+            <div class="cbubble theirs typing"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <div v-if="!aiMessages.length" class="qchips">
+            <div v-for="s in aiSuggestions" :key="s" class="qchip" @click="sendAI(s)">{{s}}</div>
+          </div>
+          <div class="chat-row">
+            <textarea class="ctextarea" v-model="aiInput" placeholder="Напиши сообщение..." :disabled="aiTyping"
+              @keydown.enter.exact.prevent="sendAI()"></textarea>
+            <button class="chat-send" @click="sendAI()" :disabled="aiTyping||!aiInput.trim()">➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- USER CHAT PAGE -->
+      <div v-if="page==='userchat'" class="chat-page">
+        <div class="chat-hdr">
+          <span>💬 Общий чат</span>
+          <span style="font-size:12px;font-weight:400;color:var(--text3)">обновляется каждые 4 с</span>
+        </div>
+        <div ref="userChatBox" class="chat-msgs">
+          <div v-if="!userMessages.length" class="empty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div class="empty-icon">💬</div>
+            <div class="empty-title">Пока нет сообщений</div>
+            <div style="font-size:13px">Будь первым, кто напишет!</div>
+          </div>
+          <div v-for="msg in userMessages" :key="msg.id" class="cmrow" :class="msg.user_id===user?.id?'mine':'theirs'">
+            <div v-if="msg.user_id!==user?.id" class="chat-author">{{msg.username}}</div>
+            <div class="cbubble" :class="msg.user_id===user?.id?'mine':'theirs'">{{msg.content}}</div>
+            <div class="cmeta">{{fmtMsgTime(msg.created_at)}}</div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <div class="chat-row">
+            <textarea class="ctextarea" v-model="userMsgInput" placeholder="Написать сообщение..."
+              @keydown.enter.exact.prevent="sendUserMsg()"></textarea>
+            <button class="chat-send" @click="sendUserMsg()" :disabled="!userMsgInput.trim()">➤</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end right-panel -->
+  </div><!-- end main-area -->
+</div><!-- end app -->
+
+<!-- TASK MODAL -->
+<div v-if="tm.show" class="modal-overlay" @click.self="tm.show=false">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">{{tm.id?'Редактировать':'Новая задача'}}</div><button class="modal-close" @click="tm.show=false">✕</button></div>
+    <div v-if="!tm.id" class="ai-parse-block">
+      <div class="ai-parse-label"><span>✨</span> Быстрый ввод с AI</div>
+      <div class="ai-parse-row">
+        <textarea v-model="tm.aiText" rows="3" placeholder="«Написать доклад по истории про ВОВ в пятницу, займёт часа 3»"></textarea>
+        <button class="btn btn-ai" @click="parseAI" :disabled="tm.aiLoading||!tm.aiText?.trim()">
+          <span v-if="tm.aiLoading">⏳<br>Анализ…</span>
+          <span v-else>✨<br>Разобрать</span>
+        </button>
+      </div>
+      <div v-if="tm.aiError" class="field-error" style="margin-top:6px">{{tm.aiError}}</div>
+      <div class="ai-divider">или заполни вручную</div>
+    </div>
+    <div class="form-group"><label>Название *</label><input v-model="tm.f.title" placeholder="Например: Решить задачи §12" :class="{err:tm.e.title}"><div v-if="tm.e.title" class="field-error">{{tm.e.title}}</div></div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;justify-content:space-between">
+        Описание
+        <button v-if="tm.f.title" class="btn btn-teal btn-sm" style="padding:3px 10px;font-size:11px;height:auto" @click="describeTask" :disabled="tm.descLoading">
+          <span v-if="tm.descLoading">⏳</span><span v-else>✨ Расписать</span>
+        </button>
+      </label>
+      <textarea v-model="tm.f.desc" rows="2" placeholder="Дополнительные детали..."></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group"><label>Предмет</label><select v-model="tm.f.subject_id"><option :value="null">Без предмета</option><option v-for="s in subjects" :key="s.id" :value="s.id">{{s.name}}</option></select></div>
+      <div class="form-group"><label>Тип</label><select v-model="tm.f.task_type"><option value="homework">Домашнее задание</option><option value="project">Проект</option><option value="test">Контрольная</option><option value="olympiad">Олимпиада</option><option value="section">Кружок</option><option value="other">Другое</option></select></div>
+      <div class="form-group"><label>Сложность</label><select v-model="tm.f.difficulty"><option value="easy">Лёгкая</option><option value="medium">Средняя</option><option value="hard">Сложная</option></select></div>
+      <div class="form-group"><label>Приоритет</label><select v-model="tm.f.priority"><option value="low">🟢 Низкий</option><option value="medium">🟡 Средний</option><option value="high">🔴 Высокий</option></select></div>
+      <div class="form-group"><label>Время (ч)</label><input type="number" v-model.number="tm.f.hours" min="0.5" max="12" step="0.5"></div>
+    </div>
+    <div class="form-group"><label>Дедлайн *</label><input type="datetime-local" v-model="tm.f.deadline" :class="{err:tm.e.deadline}"><div v-if="tm.e.deadline" class="field-error">{{tm.e.deadline}}</div></div>
+    <div class="modal-footer"><button class="btn btn-ghost" @click="tm.show=false">Отмена</button><button class="btn btn-primary" style="width:auto;padding:12px 28px" @click="saveTask">{{tm.id?'Сохранить':'Создать'}}</button></div>
+  </div>
+</div>
+
+<!-- TRANSFER MODAL -->
+<div v-if="xfer.show" class="modal-overlay" @click.self="xfer.show=false">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Перенести задачу</div><button class="modal-close" @click="xfer.show=false">✕</button></div>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:4px">Задача: <strong style="color:var(--text)">{{xfer.task?.title}}</strong></p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:4px">Перегруженные дни отмечены ⚡</p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:4px">🟢 Свободный день · ⚡ Перегружен</p>
+    <div class="day-pick">
+      <div v-for="d in xferDays" :key="d.date" class="dp-btn" :class="{selected:xfer.date===d.date,overloaded:d.is_overloaded,free:d.total_hours===0}" @click="xfer.date=d.date">
+        <div class="dp-name">{{d.day_name}}</div><div class="dp-date">{{new Date(d.date+'T00:00:00').getDate()}}</div><div class="dp-hours">{{d.total_hours===0?'свободно':d.total_hours+'ч'}}<span v-if="d.is_overloaded"> ⚡</span></div>
+      </div>
+    </div>
+    <div v-if="xfer.date&&xferDays.find(d=>d.date===xfer.date)?.is_overloaded" class="warn-box">⚠️ Выбранный день уже перегружен.</div>
+    <div class="modal-footer"><button class="btn btn-ghost" @click="xfer.show=false">Отмена</button><button class="btn btn-primary" style="width:auto;padding:12px 28px" @click="doXfer" :disabled="!xfer.date">Перенести</button></div>
+  </div>
+</div>
+
+<!-- SUBJECT MODAL -->
+<div v-if="sm.show||openSubjModal" class="modal-overlay" @click.self="sm.show=false;openSubjModal=false">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">{{sm.id?'Редактировать предмет':'Новый предмет'}}</div><button class="modal-close" @click="sm.show=false;openSubjModal=false">✕</button></div>
+    <div class="form-group"><label>Название</label><input v-model="sm.f.name" placeholder="Математика"></div>
+    <div class="form-group"><label>Цвет</label><div style="display:flex;align-items:center;gap:10px"><input type="color" v-model="sm.f.color"><div style="width:32px;height:32px;border-radius:8px" :style="{background:sm.f.color}"></div><span style="font-size:13px;color:var(--text2)">{{sm.f.color}}</span></div></div>
+    <div class="modal-footer"><button class="btn btn-ghost" @click="sm.show=false;openSubjModal=false">Отмена</button><button class="btn btn-primary" style="width:auto;padding:12px 28px" @click="saveSubj">{{sm.id?'Сохранить':'Создать'}}</button></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div v-if="toast.show" class="toast" :class="toast.type">{{toast.msg}}</div>
+
+<div class="fab" @click="openTM()" v-if="page !== 'settings' && page !== 'stats' && page !== 'aichat' && page !== 'userchat' && page !== 'help'">
+  +
+</div>
+
+</div>
+
+<script>
+const {createApp,ref,computed,onMounted,watch,nextTick}=Vue;
+createApp({
+  setup(){
+    const API='';
+    const token=ref(localStorage.getItem('sb_token')||'');
+    const user=ref(null);
+    const page=ref('tasks');
+    const mobilePanelOpen=ref(false);
+    watch(page,()=>{mobilePanelOpen.value=false;});
+    const loading=ref(false);
+    const taskView=ref('today');
+    const settTab=ref('profile');
+    const filterSubj=ref(null);
+    const helpTab=ref('start');
+    const helpTopics=[
+      {id:'start',icon:'🚀',title:'С чего начать'},
+      {id:'tasks',icon:'📝',title:'Задачи'},
+      {id:'load',icon:'⚖️',title:'Нагрузка и перегруз'},
+      {id:'subjects',icon:'📚',title:'Предметы'},
+      {id:'calendar',icon:'📅',title:'Календарь'},
+      {id:'notify',icon:'🔔',title:'Уведомления'},
+      {id:'ai',icon:'🤖',title:'AI и чат'},
+      {id:'stats',icon:'📊',title:'Статистика и копия'},
+      {id:'faq',icon:'❔',title:'Частые вопросы'},
+    ];
+    function helpGo(id){helpTab.value=id;document.getElementById('help-'+id)?.scrollIntoView({behavior:'smooth',block:'start'});}
+
+    // auth
+    const authTab=ref('login');
+    const authLoading=ref(false);
+    const authError=ref('');
+    const lf=ref({username:'',password:''});
+    const le=ref({});
+    const rf=ref({username:'',email:'',password:''});
+    const re=ref({});
+    const showPw=ref(false);
+
+    // setup
+    const setupStep=ref(0);
+    const selProfile=ref('');
+    const setupLoading=ref(false);
+    const profiles=[
+      {id:'7-9',icon:'📗',title:'7–9 класс',sub:'Базовый курс'},
+      {id:'10-11',icon:'📘',title:'10–11 класс',sub:'Профильный курс'},
+      {id:'college',icon:'🎓',title:'Колледж',sub:'СПО'},
+      {id:'other',icon:'✏️',title:'Другое',sub:'Свой набор'},
+    ];
+    const ALL_S=[
+      {name:'Математика',color:'#E74C3C'},{name:'Алгебра',color:'#C0392B'},{name:'Геометрия',color:'#E67E22'},
+      {name:'Русский язык',color:'#3498DB'},{name:'Литература',color:'#9B59B6'},{name:'История',color:'#D4AC0D'},
+      {name:'Физика',color:'#1ABC9C'},{name:'Химия',color:'#2ECC71'},{name:'Биология',color:'#27AE60'},
+      {name:'Английский язык',color:'#34495E'},{name:'Информатика',color:'#2980B9'},{name:'Физкультура',color:'#52D98A'},
+      {name:'Обществознание',color:'#8E44AD'},{name:'География',color:'#16A085'},{name:'Экономика',color:'#F39C12'},
+    ];
+    const PROF_DEF={
+      '7-9':['Математика','Алгебра','Геометрия','Русский язык','Литература','История','Физика','Химия','Биология','Английский язык','Информатика','Физкультура'],
+      '10-11':['Алгебра','Геометрия','Русский язык','Литература','История','Физика','Химия','Биология','Английский язык','Информатика','Обществознание'],
+      'college':['Математика','Русский язык','Английский язык','Информатика','Экономика'],
+      'other':[],
+    };
+    const setupSubjs=ref([]);
+
+    // data
+    const tasks=ref([]);
+    const archive=ref([]);
+    const todayTasks=ref([]);
+    const weekTasks=ref([]);
+    const subjects=ref([]);
+    const wStats=ref(null);
+    const subjStats=ref([]);
+    const allTasks=computed(()=>[...tasks.value,...archive.value]);
+
+    // search
+    const srch=ref('');
+    const searchResults=ref([]);
+
+    // calendar
+    const calDate=ref(new Date());
+    const calYear=computed(()=>calDate.value.getFullYear());
+    const MN_FULL=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+    const calMonthName=computed(()=>MN_FULL[calDate.value.getMonth()]);
+    const calCells=computed(()=>{
+      const y=calDate.value.getFullYear(),m=calDate.value.getMonth();
+      const first=new Date(y,m,1);
+      let dow=first.getDay();if(dow===0)dow=7;
+      const cells=[];
+      for(let i=1;i<dow;i++){const d=new Date(y,m,1-dow+i);cells.push({key:'p'+i,day:d.getDate(),date:d,currentMonth:false,isToday:false,tasks:[]});}
+      const daysInMonth=new Date(y,m+1,0).getDate();
+      const today=new Date();
+      for(let d=1;d<=daysInMonth;d++){
+        const dt=new Date(y,m,d);
+        const isT=dt.getDate()===today.getDate()&&dt.getMonth()===today.getMonth()&&dt.getFullYear()===today.getFullYear();
+        const dayTasks=allTasks.value.filter(t=>{const td=new Date(t.deadline);return td.getDate()===d&&td.getMonth()===m&&td.getFullYear()===y;});
+        cells.push({key:'c'+d,day:d,date:dt,currentMonth:true,isToday:isT,tasks:dayTasks});
+      }
+      const remaining=42-cells.length;
+      for(let i=1;i<=remaining;i++){const d=new Date(y,m+1,i);cells.push({key:'n'+i,day:d.getDate(),date:d,currentMonth:false,isToday:false,tasks:[]});}
+      return cells;
+    });
+    function calPrev(){const d=new Date(calDate.value);d.setMonth(d.getMonth()-1);calDate.value=d;}
+    function calNext(){const d=new Date(calDate.value);d.setMonth(d.getMonth()+1);calDate.value=d;}
+    function calToday(){calDate.value=new Date();}
+    function calCellClick(cell){if(cell.tasks.length===0)openTM();else if(cell.tasks.length===1)openTM(cell.tasks[0]);}
+
+    // charts
+    const wc=ref(null);const sc=ref(null);const dc=ref(null);const hc=ref(null);
+    let CI={};
+
+    // modals
+    const tm=ref({show:false,id:null,f:{},e:{}});
+    const sm=ref({show:false,id:null,f:{}});
+    const xfer=ref({show:false,task:null,date:''});
+    const openSubjModal=ref(false);
+
+    const showDone=ref(false);
+    const cfg=ref({notifyDay:true,notifyUrgent:false,notifyOverload:true,notifyMorning:false,email:'',profile:'7-9',threshold:4});
+    const toast=ref({show:false,msg:'',type:'success'});
+    let toastT=null;
+    function showT(msg,type='success'){clearTimeout(toastT);toast.value={show:true,msg,type};toastT=setTimeout(()=>toast.value.show=false,3000);}
+
+    const H=()=>({'Content-Type':'application/json','Authorization':`Bearer ${token.value}`});
+    async function api(m,p,b){
+      const o={method:m,headers:H()};if(b)o.body=JSON.stringify(b);
+      const r=await fetch(API+p,o);if(r.status===204)return null;
+      const d=await r.json();if(!r.ok)throw new Error(d.detail||'Ошибка');return d;
+    }
+
+    // push notifications
+    const pushSupported=ref('serviceWorker' in navigator && 'PushManager' in window);
+    const pushSubscribed=ref(false);
+    const pushBusy=ref(false);
+    function urlBase64ToUint8Array(base64String){
+      const padding='='.repeat((4-base64String.length%4)%4);
+      const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+      const raw=atob(base64);const arr=new Uint8Array(raw.length);
+      for(let i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+      return arr;
+    }
+    async function registerSW(){
+      if(!pushSupported.value)return null;
+      try{return await navigator.serviceWorker.register('/sw.js');}catch(e){return null;}
+    }
+    async function refreshPushState(){
+      if(!pushSupported.value)return;
+      const reg=await navigator.serviceWorker.getRegistration('/sw.js');
+      const sub=reg&&await reg.pushManager.getSubscription();
+      pushSubscribed.value=!!sub;
+    }
+    async function enablePush(){
+      if(!pushSupported.value){showT('Браузер не поддерживает push-уведомления','error');return;}
+      pushBusy.value=true;
+      try{
+        const reg=await registerSW();
+        if(!reg)throw new Error('Не удалось зарегистрировать Service Worker');
+        const perm=await Notification.requestPermission();
+        if(perm!=='granted'){showT('Уведомления не разрешены в браузере','warn');pushBusy.value=false;return;}
+        const{publicKey}=await api('GET','/api/push/vapid-public-key');
+        let sub=await reg.pushManager.getSubscription();
+        if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(publicKey)});
+        const j=sub.toJSON();
+        await api('POST','/api/push/subscribe',{endpoint:j.endpoint,keys:j.keys});
+        pushSubscribed.value=true;
+        showT('Push-уведомления включены 🔔');
+      }catch(e){showT(e.message||'Не удалось включить уведомления','error');}
+      pushBusy.value=false;
+    }
+    async function disablePush(){
+      pushBusy.value=true;
+      try{
+        const reg=await navigator.serviceWorker.getRegistration('/sw.js');
+        const sub=reg&&await reg.pushManager.getSubscription();
+        if(sub){await api('POST','/api/push/unsubscribe',{endpoint:sub.endpoint});await sub.unsubscribe();}
+        pushSubscribed.value=false;
+        showT('Push-уведомления выключены','warn');
+      }catch(e){showT(e.message||'Ошибка','error');}
+      pushBusy.value=false;
+    }
+    async function togglePush(){if(pushSubscribed.value)await disablePush();else await enablePush();}
+    async function testPush(){try{await api('POST','/api/push/test');showT('Тестовое уведомление отправлено');}catch(e){showT(e.message,'error');}}
+
+    // pw
+    const pwPct=computed(()=>{const p=rf.value.password;if(!p)return 0;let s=0;if(p.length>=6)s+=25;if(p.length>=10)s+=25;if(/[A-Z]/.test(p))s+=25;if(/[0-9!@#$%]/.test(p))s+=25;return s;});
+    const pwColor=computed(()=>{const p=pwPct.value;if(p<=25)return'#FF5B79';if(p<=50)return'#F7826A';if(p<=75)return'#F7C86A';return'#52D98A';});
+    const pwLabel=computed(()=>{const p=pwPct.value;if(p<=25)return'Слабый';if(p<=50)return'Средний';if(p<=75)return'Хороший';return'Отличный';});
+
+    function vLogin(){const e={};if(!lf.value.username)e.username='Введи имя пользователя';if(!lf.value.password)e.password='Введи пароль';le.value=e;return!Object.keys(e).length;}
+    function vReg(){const e={};if(!rf.value.username||rf.value.username.length<3)e.username='Минимум 3 символа';if(!rf.value.email||!/\S+@\S+\.\S+/.test(rf.value.email))e.email='Некорректный email';if(!rf.value.password||rf.value.password.length<6)e.password='Пароль должен содержать от 6 до 30 символов';if(rf.value.password&&rf.value.password.length>30)e.password='Пароль не более 30 символов';re.value=e;return!Object.keys(e).length;}
+
+    async function doLogin(){if(!vLogin())return;authError.value='';authLoading.value=true;
+      try{const f=new URLSearchParams();f.append('username',lf.value.username);f.append('password',lf.value.password);
+        const r=await fetch(API+'/api/auth/login',{method:'POST',body:f});const d=await r.json();
+        if(!r.ok)throw new Error(d.detail||'Неверный логин или пароль');
+        token.value=d.access_token;localStorage.setItem('sb_token',token.value);await init();
+      }catch(e){authError.value=e.message;}authLoading.value=false;}
+
+    async function doRegister(){if(!vReg())return;authError.value='';authLoading.value=true;
+      try{await api('POST','/api/auth/register',rf.value);
+        lf.value={username:rf.value.username,password:rf.value.password};await doLogin();
+        if(token.value)setupStep.value=1;
+      }catch(e){authError.value=e.message;}authLoading.value=false;}
+
+    function logout(){token.value='';localStorage.removeItem('sb_token');user.value=null;tasks.value=[];setupStep.value=0;}
+
+    function goSubjects(){const def=PROF_DEF[selProfile.value]||[];setupSubjs.value=ALL_S.map(s=>({...s,sel:def.includes(s.name)}));cfg.value.profile=selProfile.value;setupStep.value=2;}
+    async function finishSetup(){setupLoading.value=true;const sel=setupSubjs.value.filter(s=>s.sel);
+      try{const ex=await api('GET','/api/subjects/');for(const s of ex)await api('DELETE',`/api/subjects/${s.id}`);for(const s of sel)await api('POST','/api/subjects/',{name:s.name,color:s.color});await loadSubjs();}catch(e){}
+      setupStep.value=0;setupLoading.value=false;showT('Профиль настроен!');}
+
+    async function init(){try{user.value=await api('GET','/api/auth/me');cfg.value.email=user.value.email||'';
+      await Promise.all([loadSubjs(),loadTasks(),loadToday(),loadWeek(),loadWStats(),loadNotifySettings()]);
+      await refreshPushState();}catch(e){logout();}}
+
+    async function loadNotifySettings(){try{const ns=await api('GET','/api/push/settings');
+      cfg.value.notifyDay=ns.notify_day;cfg.value.notifyUrgent=ns.notify_urgent;cfg.value.notifyOverload=ns.notify_overload;cfg.value.notifyMorning=ns.notify_morning;cfg.value.threshold=ns.overload_threshold;
+    }catch(e){}}
+
+    async function loadSubjs(){subjects.value=await api('GET','/api/subjects/');}
+    async function loadTasks(){loading.value=true;const all=await api('GET','/api/tasks/');tasks.value=all.filter(t=>!t.is_completed);archive.value=all.filter(t=>t.is_completed);loading.value=false;}
+    async function loadToday(){todayTasks.value=await api('GET','/api/tasks/today');}
+    async function loadWeek(){weekTasks.value=await api('GET','/api/tasks/week');}
+    async function loadWStats(){wStats.value=await api('GET','/api/tasks/stats/week');}
+    async function loadStats(){await Promise.all([loadWStats(),api('GET','/api/tasks/stats/subjects').then(d=>subjStats.value=d)]);await nextTick();renderCharts();}
+
+    const activeToday=computed(()=>todayTasks.value.filter(t=>!t.is_completed));
+    const doneToday=computed(()=>todayTasks.value.filter(t=>t.is_completed));
+
+    const overdueTasks2=computed(()=>tasks.value.filter(t=>!t.is_completed&&new Date(t.deadline)<new Date()));
+    const currentTasks=computed(()=>{
+      if(taskView.value==='today')return todayTasks.value.filter(t=>!t.is_completed);
+      if(taskView.value==='week')return weekTasks.value.filter(t=>!t.is_completed);
+      if(taskView.value==='overdue')return overdueTasks2.value;
+      if(taskView.value==='archive')return archive.value;
+      if(taskView.value==='all'){
+        let r=[...tasks.value];
+        if(filterSubj.value)r=r.filter(t=>t.subject&&t.subject.id===filterSubj.value);
+        return r;
+      }
+      return tasks.value;
+    });
+
+    function doSearch(){if(!srch.value){searchResults.value=[];return;}const q=srch.value.toLowerCase();searchResults.value=allTasks.value.filter(t=>t.title.toLowerCase().includes(q));}
+
+    function vTask(f){const e={};if(!f.title||!f.title.trim())e.title='Введи название';if(!f.deadline)e.deadline='Укажи дедлайн';return e;}
+
+    function openTM(task=null){
+      if(task){tm.value={show:true,id:task.id,e:{},aiText:'',aiLoading:false,aiError:'',descLoading:false,f:{title:task.title,desc:task.description||'',task_type:task.task_type,difficulty:task.difficulty,priority:task.priority||'medium',deadline:task.deadline?task.deadline.slice(0,16):'',hours:task.estimated_hours,subject_id:task.subject?task.subject.id:null}};}
+      else{const d=new Date();d.setDate(d.getDate()+1);d.setHours(23,59,0,0);tm.value={show:true,id:null,e:{},aiText:'',aiLoading:false,aiError:'',descLoading:false,f:{title:'',desc:'',task_type:'homework',difficulty:'medium',priority:'medium',deadline:d.toISOString().slice(0,16),hours:1,subject_id:null}};}
+    }
+    async function parseAI(){
+      if(!tm.value.aiText?.trim())return;
+      tm.value.aiLoading=true;tm.value.aiError='';
+      try{
+        const d=await api('POST','/api/tasks/parse',{text:tm.value.aiText});
+        const f=tm.value.f;
+        if(d.title)f.title=d.title;
+        if(d.description)f.desc=d.description;
+        if(d.task_type)f.task_type=d.task_type;
+        if(d.priority)f.priority=d.priority;
+        if(d.estimated_hours)f.hours=d.estimated_hours;
+        if(d.deadline)f.deadline=new Date(d.deadline).toISOString().slice(0,16);
+        showT('Поля заполнены с помощью AI ✨');
+      }catch(e){tm.value.aiError=e.message||'Ошибка AI-разбора';}
+      tm.value.aiLoading=false;
+    }
+    async function describeTask(){
+      if(!tm.value.f.title)return;
+      tm.value.descLoading=true;
+      try{
+        const subj=subjects.value.find(s=>s.id===tm.value.f.subject_id);
+        const d=await api('POST','/api/tasks/describe',{title:tm.value.f.title,task_type:tm.value.f.task_type,subject_name:subj?.name||null,difficulty:tm.value.f.difficulty});
+        if(d.description)tm.value.f.desc=d.description;
+        showT('Описание сгенерировано ✨');
+      }catch(e){showT(e.message||'Ошибка генерации','error');}
+      tm.value.descLoading=false;
+    }
+    const aiHints=ref([]);const hintsLoading=ref(false);
+
+    // ── AI Chat ────────────────────────────────────────────────────────────
+    const aiModel=ref('qwen2.5');
+    const aiMessages=ref([]);
+    const aiInput=ref('');
+    const aiTyping=ref(false);
+    const aiChatBox=ref(null);
+    const aiSuggestions=['Куда лучше поставить новую задачу?','Покажи расписание на неделю','Какие задачи просрочены?','Перенеси самую тяжёлую задачу'];
+
+    function _scrollChat(boxRef){nextTick(()=>{if(boxRef.value)boxRef.value.scrollTop=boxRef.value.scrollHeight;});}
+
+    async function sendAI(text=null){
+      const msg=(text||aiInput.value).trim();if(!msg)return;
+      aiInput.value='';
+      aiMessages.value.push({role:'user',content:msg});
+      aiTyping.value=true;
+      _scrollChat(aiChatBox);
+      try{
+        const d=await api('POST','/api/chat/ai',{message:msg});
+        aiMessages.value.push({role:'assistant',content:d.reply,action_result:d.action_result||null});
+        if(d.action_result)await refresh();
+      }catch(e){aiMessages.value.push({role:'assistant',content:'❌ Ошибка: '+(e.message||'AI недоступен')});}
+      aiTyping.value=false;
+      _scrollChat(aiChatBox);
+    }
+
+    async function clearAIChat(){
+      if(!confirm('Очистить историю AI-чата?'))return;
+      try{await api('DELETE','/api/chat/ai/history');}catch{}
+      aiMessages.value=[];
+    }
+
+    // ── User Chat ──────────────────────────────────────────────────────────
+    const userMessages=ref([]);
+    const userMsgInput=ref('');
+    const userChatBox=ref(null);
+    let _chatPoll=null;
+
+    async function loadUserMsgs(){
+      try{userMessages.value=await api('GET','/api/chat/messages');}catch{}
+    }
+
+    async function sendUserMsg(){
+      const msg=userMsgInput.value.trim();if(!msg)return;
+      userMsgInput.value='';
+      try{await api('POST','/api/chat/messages',{content:msg});await loadUserMsgs();_scrollChat(userChatBox);}
+      catch(e){showT(e.message||'Ошибка отправки','error');}
+    }
+
+    function fmtMsgTime(iso){const d=new Date(iso);return`${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;}
+
+    async function loadAIHints(){
+      hintsLoading.value=true;
+      try{const d=await api('GET','/api/tasks/hints');aiHints.value=d.hints||[];}catch(e){}
+      hintsLoading.value=false;
+    }
+    async function saveTask(){const f=tm.value.f;const e=vTask(f);if(Object.keys(e).length){tm.value.e=e;return;}
+      try{const b={title:f.title,description:f.desc,task_type:f.task_type,difficulty:f.difficulty,priority:f.priority||'medium',deadline:new Date(f.deadline).toISOString(),estimated_hours:f.hours,subject_id:f.subject_id};
+        if(tm.value.id){await api('PUT',`/api/tasks/${tm.value.id}`,b);showT('Задача обновлена');}
+        else{await api('POST','/api/tasks/',b);showT('Задача создана');}
+        tm.value.show=false;await refresh();}catch(e){showT(e.message,'error');}}
+
+    async function toggleTask(t){await api('PUT',`/api/tasks/${t.id}`,{is_completed:!t.is_completed});if(!t.is_completed)showT('Задача выполнена ✅');await refresh();}
+    async function delTask(id){if(!confirm('Удалить задачу?'))return;await api('DELETE',`/api/tasks/${id}`);showT('Удалено','warn');await refresh();}
+
+    const xferDays=computed(()=>wStats.value?wStats.value.days:[]);
+    function openXfer(t){xfer.value={show:true,task:t,date:''};}
+    async function doXfer(){const t=xfer.value.task;const ds=xfer.value.date;if(!ds)return;const orig=new Date(t.deadline);const[y,m,d]=ds.split('-').map(Number);const nd=new Date(y,m-1,d,orig.getHours(),orig.getMinutes());await api('PUT',`/api/tasks/${t.id}`,{deadline:nd.toISOString()});xfer.value.show=false;showT('Задача перенесена 📆');await refresh();}
+
+    function openSM(s=null){if(s)sm.value={show:true,id:s.id,f:{name:s.name,color:s.color}};else sm.value={show:true,id:null,f:{name:'',color:'#7C6AF7'}};}
+    async function saveSubj(){if(!sm.value.f.name)return;try{if(sm.value.id)await api('PUT',`/api/subjects/${sm.value.id}`,sm.value.f);else await api('POST','/api/subjects/',sm.value.f);sm.value.show=false;openSubjModal.value=false;await loadSubjs();showT('Предмет сохранён');}catch(e){showT(e.message,'error');}}
+    async function delSubj(id){if(!confirm('Удалить предмет?'))return;await api('DELETE',`/api/subjects/${id}`);await loadSubjs();showT('Удалено','warn');}
+
+    async function saveCfg(){localStorage.setItem('sb_cfg',JSON.stringify(cfg.value));
+      if(token.value){try{await api('PUT','/api/push/settings',{notify_day:cfg.value.notifyDay,notify_urgent:cfg.value.notifyUrgent,notify_overload:cfg.value.notifyOverload,notify_morning:cfg.value.notifyMorning,overload_threshold:cfg.value.threshold});}catch(e){}}
+      showT('Настройки сохранены');}
+    async function clearArchive(){if(!confirm('Удалить все выполненные задачи?'))return;for(const t of archive.value)await api('DELETE',`/api/tasks/${t.id}`);await refresh();showT('Архив очищен','warn');}
+
+    function exportBk(){const d={exported_at:new Date().toISOString(),user:user.value?.username,tasks:allTasks.value,subjects:subjects.value};const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`studybalance_${new Date().toISOString().slice(0,10)}.json`;a.click();showT('Копия скачана');}
+    async function importBk(e){const file=e.target.files[0];if(!file)return;if(!confirm('Восстановление заменит текущие данные. Продолжить?'))return;showT('Функция восстановления требует серверной поддержки','warn');}
+
+    function renderCharts(){if(!wStats.value)return;const sc2={x:{ticks:{color:'#8B93C4',font:{family:'Onest'}},grid:{color:'#2A3356'}},y:{ticks:{color:'#8B93C4',font:{family:'Onest'}},grid:{color:'#2A3356'}}};
+      Object.values(CI).forEach(c=>c.destroy());CI={};
+      if(wc.value){const d=wStats.value.days;CI.wc=new Chart(wc.value,{type:'bar',data:{labels:d.map(d=>d.day_name),datasets:[{data:d.map(d=>d.total_hours),backgroundColor:d.map(d=>d.is_overloaded?'rgba(255,91,121,.75)':d.total_hours>2?'rgba(247,130,106,.65)':'rgba(82,217,138,.7)'),borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw}ч`}}},scales:sc2}});}
+      if(sc.value&&subjStats.value.length){const s=subjStats.value;CI.sc=new Chart(sc.value,{type:'doughnut',data:{labels:s.map(x=>x.name),datasets:[{data:s.map(x=>x.total),backgroundColor:s.map(x=>x.color),borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8B93C4',font:{family:'Onest'},padding:10}}}}});}
+      if(dc.value&&wStats.value){const done=wStats.value.completed_tasks,active=wStats.value.total_tasks-done;CI.dc=new Chart(dc.value,{type:'doughnut',data:{labels:['Выполнено','Активные'],datasets:[{data:[done,active],backgroundColor:['rgba(82,217,138,.8)','rgba(124,106,247,.5)'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8B93C4',font:{family:'Onest'}}}}}});}
+      if(hc.value&&subjStats.value.length){const s=subjStats.value.slice(0,8);CI.hc=new Chart(hc.value,{type:'bar',data:{labels:s.map(x=>x.name),datasets:[{data:s.map(x=>x.hours),backgroundColor:s.map(x=>x.color+'CC'),borderRadius:8,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:sc2}});}}
+
+    function dlChart(k,name){const c=CI[k];if(!c)return;const a=document.createElement('a');a.href=c.toBase64Image();a.download=`studybalance_${name}.png`;a.click();}
+    function exportCSV(){const all=allTasks.value;const rows=[['Название','Предмет','Тип','Сложность','Дедлайн','Часы','Выполнено']];all.forEach(t=>rows.push([t.title,t.subject?t.subject.name:'—',TL[t.task_type],DL[t.difficulty],fmtDL(t.deadline),t.estimated_hours,t.is_completed?'Да':'Нет']));const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');const b=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`studybalance_stats_${new Date().toISOString().slice(0,10)}.csv`;a.click();showT('CSV экспортирован');}
+
+    async function refresh(){await Promise.all([loadTasks(),loadToday(),loadWeek(),loadWStats()]);}
+
+    const WD=['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+    const MN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+    const _n=new Date();
+    const todayNum=computed(()=>_n.getDate());
+    const todayWd=computed(()=>WD[_n.getDay()]);
+    const todayMon=computed(()=>MN[_n.getMonth()]);
+    const todayH=computed(()=>activeToday.value.reduce((s,t)=>s+t.estimated_hours,0).toFixed(1));
+    function isToday(ds){const d=new Date(ds+'T00:00:00'),t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();}
+    function lc(h){return h<=2?'lo':h<=4?'lw':'lc';}
+    function fmtDL(iso){const d=new Date(iso);return`${d.getDate()} ${MN[d.getMonth()]} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;}
+    function dlClass(t){if(t.is_completed)return'';const diff=(new Date(t.deadline)-new Date())/3600000;if(diff<0)return'overdue';if(diff<24)return'soon';return'';}
+    const TL={homework:'ДЗ',project:'Проект',test:'Контрольная',olympiad:'Олимпиада',section:'Кружок',other:'Другое'};
+    const DL={easy:'Лёгкая',medium:'Средняя',hard:'Сложная'};
+    const TC={homework:'th',project:'tp',test:'tt',olympiad:'to',section:'ts',other:''};
+    const DC2={easy:'de',medium:'dm',hard:'dh'};
+    function typeClass(t){return TC[t]||'';}
+    function diffClass(d){return DC2[d]||'';}
+
+    // Просроченные задачи
+    const overdueTasks=computed(()=>tasks.value.filter(t=>!t.is_completed&&new Date(t.deadline)<new Date()));
+
+    // Текущие задачи с поддержкой overdue
+    // patch currentTasks to include overdue
+    const _origCurrentTasks=currentTasks;
+
+    // Аналитические выводы
+    const weekInsight=computed(()=>{
+      if(!wStats.value)return'';
+      const d=wStats.value.days;const max=d.reduce((a,b)=>a.total_hours>b.total_hours?a:b,d[0]);
+      const overloaded=d.filter(x=>x.is_overloaded);
+      if(overloaded.length===0)return'✅ На этой неделе нет перегруженных дней.';
+      return`Самый загруженный день — ${max.day_name} (${max.total_hours}ч). Перегружено: ${overloaded.length} дн.`;
+    });
+    const subjectInsight=computed(()=>{
+      if(!subjStats.value.length)return'';
+      const top=subjStats.value.reduce((a,b)=>a.total>b.total?a:b);
+      return`Больше всего задач по предмету "${top.name}" — ${top.total} шт.`;
+    });
+    const completionInsight=computed(()=>{
+      if(!wStats.value)return'';
+      const total=wStats.value.total_tasks;const done=wStats.value.completed_tasks;
+      if(total===0)return'Задач пока нет.';
+      const pct=Math.round(done/total*100);
+      if(pct>=80)return`✅ Отличный результат: выполнено ${pct}% задач!`;
+      if(pct>=50)return`Выполнено ${pct}% задач. Продолжай в том же духе!`;
+      return`Выполнено ${pct}% задач — есть куда расти!`;
+    });
+    const hoursInsight=computed(()=>{
+      if(!subjStats.value.length)return'';
+      const top=subjStats.value.reduce((a,b)=>a.hours>b.hours?a:b);
+      return`Больше всего времени уходит на "${top.name}" — ${top.hours.toFixed(1)}ч.`;
+    });
+    const recommendations=computed(()=>{
+      const r=[];if(!wStats.value)return r;
+      const d=wStats.value.days;
+      const overloaded=d.filter(x=>x.is_overloaded);const free=d.filter(x=>x.total_hours===0);
+      if(overloaded.length>0&&free.length>0)r.push({icon:'📆',text:`Перегруз в ${overloaded.length} дн. Есть ${free.length} свободных дня — перенеси туда задачи.`});
+      if(overdueTasks.value.length>0)r.push({icon:'⏰',text:`${overdueTasks.value.length} задач просрочено. Реши или перенеси их как можно скорее.`});
+      const urgent=tasks.value.filter(t=>!t.is_completed&&(new Date(t.deadline)-new Date())/3600000<24&&new Date(t.deadline)>new Date());
+      if(urgent.length>0)r.push({icon:'🔥',text:`${urgent.length} задач с дедлайном в ближайшие 24 часа!`});
+      if(subjStats.value.length){const top=subjStats.value.reduce((a,b)=>a.total>b.total?a:b);r.push({icon:'📚',text:`По "${top.name}" больше всего задач на этой неделе.`});}
+      if(overloaded.length>0){const max=d.reduce((a,b)=>a.total_hours>b.total_hours?a:b,d[0]);r.push({icon:'💡',text:`В ${max.day_name} самая высокая нагрузка (${max.total_hours}ч). Попробуй перенести часть задач.`});}
+      return r.slice(0,4);
+    });
+
+    function isOverdue(t){return new Date(t.deadline)<new Date();}
+    function overdueAgo(t){return Math.floor((new Date()-new Date(t.deadline))/86400000);}
+    function priColor(p){if(p==='high')return'#FF5B79';if(p==='low')return'#52D98A';return'#F7C86A';}
+    function priLabel(p){const PL={low:'Низкий',medium:'Средний',high:'Высокий'};return PL[p]||'Средний';}
+    const PL={low:'Низкий',medium:'Средний',high:'Высокий'};
+
+    watch(page,async val=>{
+      clearInterval(_chatPoll);
+      if(val==='stats'){await loadStats();await loadAIHints();}
+      if(val==='userchat'){
+        await loadUserMsgs();_scrollChat(userChatBox);
+        _chatPoll=setInterval(async()=>{if(page.value==='userchat'){await loadUserMsgs();}},4000);
+      }
+    });
+    onMounted(async()=>{const s=localStorage.getItem('sb_cfg');if(s)try{Object.assign(cfg.value,JSON.parse(s));}catch{}
+      await registerSW();
+      if(token.value)await init();else await refreshPushState();});
+
+    return{
+      token,user,page,mobilePanelOpen,loading,authTab,authLoading,authError,lf,le,rf,re,showPw,
+      setupStep,selProfile,profiles,setupSubjs,setupLoading,
+      tasks,archive,todayTasks,weekTasks,subjects,wStats,subjStats,allTasks,
+      srch,searchResults,taskView,settTab,filterSubj,currentTasks,helpTab,helpTopics,helpGo,
+      wc,sc,dc,hc,tm,sm,xfer,xferDays,openSubjModal,
+      activeToday,doneToday,showDone,cfg,toast,
+      todayNum,todayWd,todayMon,todayH,pwPct,pwColor,pwLabel,
+      calDate,calYear,calMonthName,calCells,
+      overdueTasks,weekInsight,subjectInsight,completionInsight,hoursInsight,recommendations,
+      isOverdue,overdueAgo,priColor,priLabel,PL,
+      doLogin,doRegister,logout,goSubjects,finishSetup,
+      openTM,saveTask,toggleTask,delTask,openXfer,doXfer,parseAI,describeTask,loadAIHints,aiHints,hintsLoading,
+      openSM,saveSubj,delSubj,doSearch,isToday,lc,fmtDL,dlClass,
+      TL,DL,typeClass,diffClass,loadStats,exportCSV,exportBk,importBk,dlChart,saveCfg,clearArchive,
+      calPrev,calNext,calToday,calCellClick,
+      aiModel,aiMessages,aiInput,aiTyping,aiChatBox,aiSuggestions,sendAI,clearAIChat,
+      userMessages,userMsgInput,userChatBox,sendUserMsg,fmtMsgTime,
+      pushSupported,pushSubscribed,pushBusy,togglePush,testPush,
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
